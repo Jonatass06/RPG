@@ -3,12 +3,12 @@ import java.util.Random;
 public class Combatente extends Personagem {
     public static Random sort = new Random();
 
-    public Combatente() {
-        super(3, 4, 2, 1, 2, 1);
+    public Combatente(Jogador jogador) {
+        super(3, 4, 2, 1, 2, 1, jogador);
     }
 
     @Override
-    protected void acoes(int ataque, Posicao[] posicao) {
+    protected void acoes(int ataque, Posicao[] posicao, int defesa) {
         //1 - normal
         //2 - normal especial
         //3 - combo
@@ -29,26 +29,20 @@ public class Combatente extends Personagem {
                 break;
         }
         if (ataque > 2) {
-            porrada(posicao[0], dadoDano);
+            porrada(posicao[0], dadoDano, defesa);
         } else {
-            porrada(posicao[0], dadoDano);
-            porrada(posicao[0], dadoDano);
+            porrada(posicao[0], dadoDano, defesa);
+            porrada(posicao[0], dadoDano, defesa);
         }
 
     }
 
-
-    @Override
-    protected void mover() {
-
-    }
-
-    private void porrada(Posicao posicao, int dadoDano) {
+    private void porrada(Posicao posicao, int dadoDano, int defesa) {
         int maior = 0;
         for (int i = 0; i < this.getForca(); i++) {
             int dado = sort.nextInt(20) + 1;
             maior = dado > maior ? dado : maior;
         }
-        this.atacar(dadoDano, this.getForca(), maior, posicao);
+        this.atacar(dadoDano, this.getForca(), maior, posicao, defesa);
     }
 }

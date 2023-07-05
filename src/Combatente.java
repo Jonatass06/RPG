@@ -3,16 +3,16 @@ import java.util.Random;
 public class Combatente extends Personagem {
     public static Random sort = new Random();
 
-    public Combatente(Jogador jogador) {
-        super(3, 4, 2, 1, 2, 1, jogador);
+    public Combatente(Jogador jogador, char simbolo) {
+        super(3, 4, 2, 1, 2, jogador, simbolo);
     }
 
     @Override
-    protected void acoes(int ataque, Posicao[] posicao, int defesa) {
+    protected void confirmarAcoes(int ataque, Posicao[] posicao, int defesa) {
         //1 - normal
-        //2 - normal especial
-        //3 - combo
-        //4 - combo especial
+        //2 - especial - gasta 2 de pc
+        //3 - combo - gasta 2 de pc
+        //4 - combo especial - gasta 4 de pc
 
         int dadoDano = 6;
         switch (ataque) {
@@ -29,20 +29,21 @@ public class Combatente extends Personagem {
                 break;
         }
         if (ataque > 2) {
-            porrada(posicao[0], dadoDano, defesa);
+            bater(posicao[0], dadoDano, defesa);
+            bater(posicao[0], dadoDano, defesa);
         } else {
-            porrada(posicao[0], dadoDano, defesa);
-            porrada(posicao[0], dadoDano, defesa);
+            bater(posicao[0], dadoDano, defesa);
         }
-
     }
 
-    private void porrada(Posicao posicao, int dadoDano, int defesa) {
-        int maior = 0;
-        for (int i = 0; i < this.getForca(); i++) {
-            int dado = sort.nextInt(20) + 1;
-            maior = dado > maior ? dado : maior;
-        }
-        this.atacar(dadoDano, this.getForca(), maior, posicao, defesa);
+    @Override
+    public String mostrarOpcoes() {
+        return """
+                [1] - Ataque normal
+                [2] - Ataque especial (-2)
+                [3] - Combo (-2)
+                [4] - Combo especial (-4)
+                """;
     }
+
 }

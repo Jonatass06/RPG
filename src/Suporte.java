@@ -1,15 +1,14 @@
 public class Suporte extends Personagem {
 
-    public Suporte(Jogador jogador) {
-        super(2, 1, 3, 4, 2, 3, jogador);
+    public Suporte(Jogador jogador, char simbolo) {
+        super(2, 1, 3, 4, 2, jogador, simbolo);
     }
 
     @Override
-    protected void acoes(int acao, Posicao[] posicoes, int defesa) {
+    protected void confirmarAcoes(int acao, Posicao[] posicoes, int defesa) {
         // 1 - Curar personagem
         // 2 - Curar em area
         // 3 - Atacar
-        // 4 - Buff
 
         switch (acao) {
             case 1:
@@ -20,7 +19,7 @@ public class Suporte extends Personagem {
                 this.mudaPontosCombate(-2);
                 break;
             case 3:
-                porrada(posicoes[0], defesa);
+                bater(posicoes[0], defesa, 3);
                 break;
             case 4:
                 buffar(posicoes[0]);
@@ -36,21 +35,24 @@ public class Suporte extends Personagem {
         }
 
         for (Posicao posicao : posicoes) {
-            posicao.getPersonagem().cura(maior / 3);
+            if (posicao.getPersonagem() != null) {
+                posicao.getPersonagem().cura(maior / 3);
+            }
         }
     }
 
-    private void porrada(Posicao posicao, int defesa){
-        int maior = 0;
-        for (int i = 0; i < this.getForca(); i++) {
-            int dado = sort.nextInt(20) + 1;
-            maior = dado > maior ? dado : maior;
+    private void buffar(Posicao posicao) {
+        if(posicao.getPersonagem()!=null){
+            posicao.getPersonagem().setBuff(3);
         }
-        this.atacar(2, this.getForca(), maior, posicao, defesa);
     }
 
-    private void buffar(Posicao posicao){
-        posicao.getPersonagem().setBuff(3);
+    @Override
+    public String mostrarOpcoes() {
+        return """
+                [1] - Curar 1 Personagem
+                [2] - Curar em Área (-2)
+                [3] - Ataque Normal
+                """;
     }
-
 }

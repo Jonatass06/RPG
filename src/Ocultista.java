@@ -1,18 +1,17 @@
-import java.util.ArrayList;
 import java.util.Random;
 
 public class Ocultista extends Personagem {
     public static Random sort = new Random();
 
-    public Ocultista(Jogador jogador) {
-        super(1, 2, 2, 3, 4, 9, jogador);
+    public Ocultista(Jogador jogador, char simbolo) {
+        super(1, 2, 2, 3, 4, jogador, simbolo);
     }
 
     @Override
-    protected void acoes(int acao, Posicao[] posicoes, int defesa) {
-        // 1-Descancar
-        // 2-Atacar Com Feitico
-        // 3-Se Curar
+    protected void confirmarAcoes(int acao, Posicao[] posicoes, int defesa) {
+        // 1-Descancar - ganha 2 pc
+        // 2-Atacar Com Feitico - perde 2 pc
+        // 3-Se Curar - perde 2 pc
         // 4-Atacar Corpo A Corpo
 
         switch (acao) {
@@ -27,58 +26,11 @@ public class Ocultista extends Personagem {
                 this.mudaPontosCombate(-2);
                 this.seCurar();
             case 4:
-                this.porrada(posicoes[0], defesa);
+                this.bater(posicoes[0], defesa, 4);
         }
-    }
-
-    @Override
-    public ArrayList<Posicao> possiveisMovimentos(Tabuleiro tabuleiro){
-        //isso vai servir apenas para suporte e combatente;
-        int distanciaAPercorrer = this.getAgilidade() * 3 - this.getVigor() / 2;
-        int c = 0, l = 0;
-        ArrayList<Posicao> possiveisMovimentos = new ArrayList<>();
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                if (tabuleiro.getTabuleiro()[i][j].getPersonagem() == this) {
-                    c = i;
-                    l = j;
-                }
-            }
-        }
-
-        for (int i = c; i < c + distanciaAPercorrer; i++) {
-            Posicao posicaoNoTabuleiro = tabuleiro.getTabuleiro()[i][l];
-            if (posicaoNoTabuleiro.getPersonagem().getDono() == null &&
-                    posicaoNoTabuleiro.getObstaculo() == null) {
-                possiveisMovimentos.add(posicaoNoTabuleiro);
-            }
-        }
-        for (int i = c; i > c - distanciaAPercorrer; i--) {
-            Posicao posicaoNoTabuleiro = tabuleiro.getTabuleiro()[i][l];
-            if (posicaoNoTabuleiro.getPersonagem().getDono() == null &&
-                    posicaoNoTabuleiro.getObstaculo() == null) {
-                possiveisMovimentos.add(posicaoNoTabuleiro);
-            }
-        }
-        for (int j = c; j < c + distanciaAPercorrer; j++) {
-            Posicao posicaoNoTabuleiro = tabuleiro.getTabuleiro()[c][j];
-            if (posicaoNoTabuleiro.getPersonagem().getDono() == null &&
-                    posicaoNoTabuleiro.getObstaculo() == null) {
-                possiveisMovimentos.add(posicaoNoTabuleiro);
-            }
-        }
-        for (int j = c; j > c - distanciaAPercorrer; j++) {
-            Posicao posicaoNoTabuleiro = tabuleiro.getTabuleiro()[c][j];
-            if (posicaoNoTabuleiro.getPersonagem().getDono() == null &&
-                    posicaoNoTabuleiro.getObstaculo() == null) {
-                possiveisMovimentos.add(posicaoNoTabuleiro);
-            }
-        }
-        return possiveisMovimentos;
     }
 
     private void enfeiticar(Posicao[] posicoes, int defesa) {
-
         int maior = 0;
         for (int i = 0; i < this.getEsforco(); i++) {
             int dado = sort.nextInt(20) + 1;
@@ -99,12 +51,14 @@ public class Ocultista extends Personagem {
         this.cura(maior / 4);
     }
 
-    private void porrada(Posicao posicao, int defesa) {
-        int maior = 0;
-        for (int i = 0; i < this.getForca(); i++) {
-            int dado = sort.nextInt(20) + 1;
-            maior = dado > maior ? dado : maior;
-        }
-        this.atacar(4, this.getForca(), maior, posicao, defesa);
+    @Override
+    public String mostrarOpcoes() {
+        return """
+                [1] - Descansar (+2)
+                [2] - Enfeitiçar (-2)
+                [3] - Se Curar (-2)
+                [4] - Ataque normal
+                """;
     }
+
 }

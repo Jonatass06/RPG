@@ -5,7 +5,7 @@ public class Obstaculo {
         this.vida = vida;
     }
 
-    public void darDano(int dano){
+    public void receberDano(int dano){
         this.vida-=dano;
     }
 

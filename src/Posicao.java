@@ -5,8 +5,13 @@ public class Posicao {
     public Personagem getPersonagem() {
         return personagem;
     }
-    public Personagem getObstaculo() {
-        return personagem;
+
+    public Obstaculo getObstaculo() {
+        return obstaculo;
+    }
+
+    public void setPersonagem(Personagem personagem) {
+        this.personagem = personagem;
     }
 
     public void setObstaculo(Obstaculo obstaculo) {

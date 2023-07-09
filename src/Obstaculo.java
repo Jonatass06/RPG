@@ -9,5 +9,8 @@ public class Obstaculo {
         this.vida-=dano;
     }
 
-
+    @Override
+    public String toString() {
+        return "Obstaculo - PV: " + vida;
+    }
 }

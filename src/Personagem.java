@@ -18,10 +18,10 @@ public abstract class Personagem {
     //associacao com jogador
     private Jogador dono;
     //simbolo para tostring
-    private char simbolo;
+    private String simbolo;
 
     public Personagem(int forca, int vigor, int agilidade, int intelecto,
-                      int esforco, Jogador dono, char simbolo) {
+                      int esforco, Jogador dono, String simbolo) {
         this.forca = forca;
         this.vigor = vigor;
         this.agilidade = agilidade;
@@ -38,11 +38,30 @@ public abstract class Personagem {
         this.pontosCombate = esforco * 5;
     }
 
-    protected abstract void confirmarAcoes(int acao, Posicao[] posicoes, int defesa);
 
-    protected abstract String mostrarOpcoes();
+    //questionar se isso é uma boa pratica
+    /*
+     * colocar um metodo em cobatente que nao recebe defesa porem nao faz nada,
+     * tirar o metodo de personagem que nao recebe defesa e colocalo apenas em ocultista e
+     * suporte ou fazer um metodo nao abstrato porem sobrescrito*/
 
-    public ArrayList<Posicao> possiveisPosicoes(int distancia, Tabuleiro tabuleiro, int tipoDaAcao) {
+    public abstract boolean confirmarAcoes(int acao, ArrayList<Posicao> posicoes,
+                                           int defesa, Tabuleiro tabuleiro);
+
+    public boolean confirmarAcoes(int acao) {
+        return true;
+    }
+
+    public boolean confirmarAcoes(int acao, ArrayList<Posicao> posicoes) {
+        return true;
+    }
+
+    //0 == nao atacando; 1 = personagem oponente; 2 == personagem aliado; 3 range
+    public abstract int tipoDeAcao(int opcao);
+
+    public abstract String mostrarOpcoes();
+
+    public ArrayList<Posicao> possiveisPosicoes(Tabuleiro tabuleiro, int opcao) {
         int c = 0, l = 0;
         ArrayList<Posicao> possivelPosicao = new ArrayList<>();
 
@@ -57,127 +76,182 @@ public abstract class Personagem {
             }
         }
 
-        percorrendoOTabuleiro(possivelPosicao, -1, tabuleiro, distancia, c, 1, tipoDaAcao);
-        percorrendoOTabuleiro(possivelPosicao, +1, tabuleiro, distancia, c, 1, tipoDaAcao);
-        percorrendoOTabuleiro(possivelPosicao, -1, tabuleiro, distancia, l, 2, tipoDaAcao);
-        percorrendoOTabuleiro(possivelPosicao, +1, tabuleiro, distancia, l, 2, tipoDaAcao);
+        percorrendoOTabuleiro(possivelPosicao, -1, tabuleiro, c, l, 1, opcao);
+        percorrendoOTabuleiro(possivelPosicao, 1, tabuleiro, c, l, 1, opcao);
+        percorrendoOTabuleiro(possivelPosicao, -1, tabuleiro, l, c, 2, opcao);
+        percorrendoOTabuleiro(possivelPosicao, 1, tabuleiro, l, c, 2, opcao);
+
+        percorrendoOTabuleiroDiagonal(possivelPosicao, 1,1,tabuleiro,c, l, opcao);
+        percorrendoOTabuleiroDiagonal(possivelPosicao, -1,-1,tabuleiro,c, l, opcao);
+        percorrendoOTabuleiroDiagonal(possivelPosicao, 1,-1,tabuleiro,c, l, opcao);
+        percorrendoOTabuleiroDiagonal(possivelPosicao, -1,1,tabuleiro,c, l, opcao);
+
         return possivelPosicao;
     }
 
-    protected void percorrendoOTabuleiro(ArrayList<Posicao> possibilidades, int modificador,
-                                         Tabuleiro tabuleiro, int distancia,
-                                         int i, int direcaoAtaque, int acao) {
+    private void percorrendoOTabuleiro(ArrayList<Posicao> possibilidades, int modificador,
+                                         Tabuleiro tabuleiro, int i, int j,
+                                       int direcaoAtaque, int opcao) {
+
+        //distancia de acordo com a acao
+        int distancia = switch (tipoDeAcao(opcao)) {
+            case 0 -> agilidade * 3;
+            case 1, 2 -> 1;
+            case 3 -> 9;
+            default -> 1;
+        };
+
         //calcula os possiveis movimento ou ataques para a direita, esquerda, cima e baixo
-        for (int j = i; j < i + distancia &&
-                j > i - distancia; j += modificador) {
+        for (int k = (i + modificador < 16) && (i + modificador) >= 0 ?
+                i + modificador : i;
+                k <= i + distancia && k >=0 && k < 16 &&
+                k >= i - distancia; k += modificador) {
+
             //1 = direita esquerda / 2 = cima baixo
             Posicao posicaoNoTabuleiro = direcaoAtaque == 1 ?
-                    tabuleiro.getTabuleiro()[i][j] :
-                    tabuleiro.getTabuleiro()[j][i];
+                    tabuleiro.getTabuleiro()[k][j] :
+                    tabuleiro.getTabuleiro()[j][k];
 
-            //acao = 0 (nao é ataque) / acao = 1 (ataque pessoal)/ acao = 2 (ataque range)
-
-            //nao é ataque
-            if (acao == 0) {
-                if (posicaoNoTabuleiro.getPersonagem() == null &&
-                        posicaoNoTabuleiro.getObstaculo() == null) {
-                    possibilidades.add(posicaoNoTabuleiro);
-                } else if (!(this instanceof Ocultista)) {
-                    break;
-                }
+            if(diferenciandoOsTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)){
+                break;
             }
+        }
+    }
 
-            //ataque pessoal
-            if (acao == 1) {
-                if (posicaoNoTabuleiro.getPersonagem() != null &&
-                        posicaoNoTabuleiro.getPersonagem().dono != this.dono) {
-                    possibilidades.add(posicaoNoTabuleiro);
-                }
+    private boolean diferenciandoOsTiposDeAcoes(Posicao posicaoNoTabuleiro, int opcao,
+                                                ArrayList<Posicao> possibilidades) {
+        //nao é ataque
+        if (tipoDeAcao(opcao) == 0) {
+            if (posicaoNoTabuleiro.getPersonagem() == null &&
+                    posicaoNoTabuleiro.getObstaculo() == null) {
+                possibilidades.add(posicaoNoTabuleiro);
+            } else if (!(this instanceof Ocultista)) {
+                return true;
             }
+        }
 
-            //ataque range
-            if (acao == 2) {
+        //personagem inimigo
+        if (tipoDeAcao(opcao) == 1) {
+            if (posicaoNoTabuleiro.getPersonagem() != null &&
+                    posicaoNoTabuleiro.getPersonagem().dono != this.dono) {
                 possibilidades.add(posicaoNoTabuleiro);
             }
         }
-    }
-
-//    private void percorrendoOTabuleiroDiagonal(ArrayList<Posicao> possivelPosicao, int modificador){}
-
-
-    public ArrayList<Posicao> definirRange(int c, int l, int tipoAtaque, Tabuleiro tabuleiro) {
-        //tipo ataque: 1 - pessoal / 2 - range
-
-        ArrayList<Posicao> range = new ArrayList<>();
-        range.add(tabuleiro.getTabuleiro()[c][l]);
-
-        //se o tipo de ataque for range
-        if (tipoAtaque == 2) {
-            for (int i = 1; i <= 2; i++) {
-                range.add(tabuleiro.getTabuleiro()[c + i][l]);
-                range.add(tabuleiro.getTabuleiro()[c][l + i]);
-                range.add(tabuleiro.getTabuleiro()[c - i][l]);
-                range.add(tabuleiro.getTabuleiro()[c][l - i]);
+        //personagem amigo
+        if (tipoDeAcao(opcao) == 2) {
+            if (posicaoNoTabuleiro.getPersonagem() != null &&
+                    posicaoNoTabuleiro.getPersonagem().dono == this.dono) {
+                possibilidades.add(posicaoNoTabuleiro);
             }
-            range.add(tabuleiro.getTabuleiro()[c + 1][l + 1]);
-            range.add(tabuleiro.getTabuleiro()[c - 1][l + 1]);
-            range.add(tabuleiro.getTabuleiro()[c + 1][l - 1]);
-            range.add(tabuleiro.getTabuleiro()[c - 1][l - 1]);
         }
-
-        return range;
+        //range
+        if (tipoDeAcao(opcao) == 3) {
+            //isso significa que é a cura do suporte
+            if(opcao == 2){
+                possibilidades.add(posicaoNoTabuleiro);
+            }
+            else{
+                if(posicaoNoTabuleiro.getPersonagem() == null
+                        || posicaoNoTabuleiro.getPersonagem().dono != this.dono
+                ){
+                    possibilidades.add(posicaoNoTabuleiro);
+                }
+            }
+        }
+        return false;
     }
 
-    protected void atacar(int dadoDano, int modificador, int dadoTeste, Posicao posicao, int defesa) {
-        int vigorAdversario = posicao.getPersonagem() != null ?
-                posicao.getPersonagem().vigor : 0;
+    private void percorrendoOTabuleiroDiagonal(ArrayList<Posicao> possibilidades, int modificadorI,
+                                               int modificadorJ, Tabuleiro tabuleiro,
+                                               int i, int j, int opcao) {
+
+        //distancia de acordo com a acao
+        int distancia = switch (tipoDeAcao(opcao)) {
+            case 0 -> agilidade * 3;
+            case 1, 2 -> 1;
+            case 3 -> 9;
+            default -> 1;
+        };
+
+        for(int k = 1; k <= distancia; k ++){
+            int c = i + (modificadorI * k);
+            int l = j + (modificadorJ * k);
+            if(c >= 0 && l >= 0 && c < 16 && l < 16){
+                Posicao posicaoNoTabuleiro = tabuleiro.getTabuleiro()[c][l];
+
+                if(diferenciandoOsTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)){
+                    break;
+                }
+            } else{
+                break;
+            }
+        }
+    }
+
+    protected boolean atacar(int dadoDano, int modificador, int dadoTeste,
+                             Posicao posicao, int opcaoDefesa, Tabuleiro tabuleiro) {
+        int defesaAdversario = posicao.getPersonagem() != null ?
+                10 + posicao.getPersonagem().vigor : 0;
         int diminuirDano = 0;
 
         // 1 - bloqueio / 2 - esquiva
-        switch (defesa) {
-            case 1 -> diminuirDano = vigorAdversario;
-            case 2 -> vigorAdversario += posicao.getPersonagem() != null ?
-                    posicao.getPersonagem().agilidade : 0;
+        switch (opcaoDefesa) {
+            case 1 -> diminuirDano = defesaAdversario;
+            case 2 -> defesaAdversario += posicao.getPersonagem() != null ?
+                    posicao.getPersonagem().agilidade * 2 : 0;
         }
-
-        if (dadoTeste == 20) {
-            if (posicao.getPersonagem() != null) {
-                posicao.getPersonagem().receberDano(sort.nextInt(dadoDano) +
-                        sort.nextInt(dadoDano) + 2 +
-                        modificador * 2 +
-                        this.buff * 2 - diminuirDano);
-            }
-        } else if (dadoTeste >= vigorAdversario) {
-            if (posicao.getPersonagem() != null) {
-                posicao.getPersonagem().receberDano(sort.nextInt(dadoDano) + 1 +
-                        modificador +
-                        this.buff - diminuirDano);
-            }
-        }
+        //dano no obstaculo
         if (posicao.getObstaculo() != null) {
             posicao.getObstaculo().receberDano(sort.nextInt(dadoDano) +
                     sort.nextInt(dadoDano) + 2 +
                     modificador * 2 +
                     this.buff * 2);
         }
+        //dano critico
+        if (dadoTeste == 20) {
+            if (posicao.getPersonagem() != null) {
+                posicao.getPersonagem().receberDano(sort.nextInt(dadoDano) +
+                        sort.nextInt(dadoDano) + 2 +
+                        modificador * 2 +
+                        this.buff * 2 - diminuirDano, tabuleiro);
+            }
+            return true;
+            //dano normal
+        } else if (dadoTeste >= defesaAdversario) {
+            if (posicao.getPersonagem() != null) {
+                posicao.getPersonagem().receberDano(sort.nextInt(dadoDano) + 1 +
+                        modificador +
+                        this.buff - diminuirDano, tabuleiro);
+            }
+            return true;
+        }
+        //errou o ataque
+        else {
+            return false;
+        }
     }
 
-    protected void bater(Posicao posicao, int defesa, int dadoDano) {
+    protected boolean bater(Posicao posicao, int defesa, int dadoDano, Tabuleiro tabuleiro) {
         int maior = 0;
 
         for (int i = 0; i < this.forca; i++) {
             int dado = sort.nextInt(20) + 1;
             maior = dado > maior ? dado : maior;
         }
-
-        this.atacar(dadoDano, this.forca, maior, posicao, defesa);
+        boolean retorno = this.atacar(dadoDano, this.forca, maior, posicao, defesa, tabuleiro);
+        this.buff = 0;
+        return retorno;
     }
 
-    public void receberDano(int dano) {
-        this.vida -= dano;
+    protected void receberDano(int dano, Tabuleiro tabuleiro) {
+        if(this.vida - dano <= 0){
+            tabuleiro.removerPersonagem(this);
+        } else {
+            this.vida -= dano;
+        }
     }
 
-    public void mudaPontosCombate(int valor) {
+    protected void mudaPontosCombate(int valor) {
         this.pontosCombate += valor;
     }
 
@@ -193,24 +267,26 @@ public abstract class Personagem {
         return intelecto;
     }
 
-    public void setBuff(int buff) {
+    protected void setBuff(int buff) {
         this.buff = buff;
-    }
-
-    public int getVida() {
-        return vida;
-    }
-
-    public int getPC() {
-        return pontosCombate;
     }
 
     @Override
     public String toString() {
-        return ""+simbolo;
+        if(buff != 0){
+            return simbolo + " - PV: "+ vida + " - PC: " + pontosCombate + " - Buff: " + buff;
+        } else{
+            return simbolo + " - PV: "+ vida + " - PC: " + pontosCombate;
+        }
     }
 
+    public Jogador getDono() {
+        return dono;
+    }
 
+    public abstract String sendoAtacado();
 
-    //verificação dos cantos
+    public String getSimbolo() {
+        return simbolo;
+    }
 }

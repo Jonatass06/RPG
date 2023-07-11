@@ -73,6 +73,6 @@ public class Suporte extends Personagem {
 
     @Override
     public String sendoAtacado() {
-        return "❤️";
+        return "🩸";
     }
 }

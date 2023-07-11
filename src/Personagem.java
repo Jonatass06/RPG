@@ -34,8 +34,8 @@ public abstract class Personagem {
     }
 
     private void calcPontos(int vigor, int esforco) {
-        this.vida = vigor * 10;
-        this.pontosCombate = esforco * 5;
+        this.vida = vigor * 20;
+        this.pontosCombate = esforco * 8;
     }
 
 
@@ -190,38 +190,54 @@ public abstract class Personagem {
 
     protected boolean atacar(int dadoDano, int modificador, int dadoTeste,
                              Posicao posicao, int opcaoDefesa, Tabuleiro tabuleiro) {
+
         int defesaAdversario = posicao.getPersonagem() != null ?
                 10 + posicao.getPersonagem().vigor : 0;
         int diminuirDano = 0;
 
-        // 1 - bloqueio / 2 - esquiva
+        // 2 - bloqueio / 1 - esquiva
         switch (opcaoDefesa) {
-            case 1 -> diminuirDano = defesaAdversario;
-            case 2 -> defesaAdversario += posicao.getPersonagem() != null ?
+            case 2 -> diminuirDano = defesaAdversario;
+            case 1-> defesaAdversario += posicao.getPersonagem() != null ?
                     posicao.getPersonagem().agilidade * 2 : 0;
         }
+
+
+        System.out.println(opcaoDefesa);
+        System.out.println(posicao.getPersonagem());
+        System.out.println(dadoTeste);
+        System.out.println(defesaAdversario);
+
         //dano no obstaculo
         if (posicao.getObstaculo() != null) {
-            posicao.getObstaculo().receberDano(sort.nextInt(dadoDano) +
+            int dano = sort.nextInt(dadoDano) +
                     sort.nextInt(dadoDano) + 2 +
                     modificador * 2 +
-                    this.buff * 2);
+                    this.buff * 2;
+            dano = dano < 0 ? 0 : dano;
+            posicao.getObstaculo().receberDano(dano);
         }
         //dano critico
         if (dadoTeste == 20) {
             if (posicao.getPersonagem() != null) {
-                posicao.getPersonagem().receberDano(sort.nextInt(dadoDano) +
+                int dano = sort.nextInt(dadoDano) +
                         sort.nextInt(dadoDano) + 2 +
                         modificador * 2 +
-                        this.buff * 2 - diminuirDano, tabuleiro);
+                        this.buff * 2 - diminuirDano;
+                dano = dano < 0 ? 0 : dano;
+                posicao.getPersonagem().receberDano(dano, tabuleiro);
+                System.out.println("dano "+ dano);
             }
             return true;
             //dano normal
         } else if (dadoTeste >= defesaAdversario) {
             if (posicao.getPersonagem() != null) {
-                posicao.getPersonagem().receberDano(sort.nextInt(dadoDano) + 1 +
+                int dano = sort.nextInt(dadoDano) + 1 +
                         modificador +
-                        this.buff - diminuirDano, tabuleiro);
+                        this.buff - diminuirDano;
+                dano = dano < 0 ? 0 : dano;
+                posicao.getPersonagem().receberDano(dano, tabuleiro);
+                System.out.println("dano "+ dano);
             }
             return true;
         }

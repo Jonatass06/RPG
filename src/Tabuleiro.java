@@ -102,9 +102,21 @@ public class Tabuleiro {
         }
     }
 
+    public boolean procuraPersonagem(Jogador usuario){
+        for(int l = 0; l < 16; l++) {
+            for (int c = 0; c < 16; c++) {
+                if (tabuleiro[c][l].getPersonagem() != null
+                && tabuleiro[c][l].getPersonagem().getDono() == usuario) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
-        String retorno = "    0   1  2  3   4  5  6   7  8  9  10  11 12  13 14 15 \n";
+        String retorno = "    0    1   2   3    4   5   6   7    8   9   10  11  12  13  14  15 \n";
 
         for (int l = 0; l < 16; l++) {
             retorno += l < 10 ? l + "   " : l + "  ";
@@ -136,10 +148,10 @@ public class Tabuleiro {
                             retorno += posicao.getPersonagem().sendoAtacado();
                             break;
                         } else if (posicao.getObstaculo() != null) {
-                            retorno += "\uD83D\uDFEB";
+                            retorno += "⚪";
                             break;
                         } else {
-                            retorno += "\uD83D\uDFE5";
+                            retorno += "🔴";
                             break;
                         }
                     }

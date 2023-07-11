@@ -26,17 +26,21 @@ public class Combatente extends Personagem {
             case 3 -> this.mudaPontosCombate(-2);
         }
         if (ataque > 2) {
-            return bater(posicao.get(0), dadoDano, defesa, tabuleiro) ||
-                    bater(posicao.get(0), dadoDano, defesa, tabuleiro);
+            if (bater(posicao.get(0), dadoDano, defesa, tabuleiro)) {
+                bater(posicao.get(0), dadoDano, defesa, tabuleiro);
+                return true;
+            }
+            return bater(posicao.get(0), dadoDano, defesa, tabuleiro);
         } else {
             return bater(posicao.get(0), dadoDano, defesa, tabuleiro);
         }
+
     }
 
     @Override
     public int tipoDeAcao(int opcao) {
         //0 == nao atacando; 1 = personagem oponente; 2 == personagem aliado; 3 range
-        return opcao == 0 ? 0:1;
+        return opcao == 0 ? 0 : 1;
     }
 
     @Override
@@ -51,7 +55,7 @@ public class Combatente extends Personagem {
 
     @Override
     public String sendoAtacado() {
-        return "\uD83E\uDD4A";
+        return "🥊";
     }
 
 }

@@ -10,17 +10,13 @@ public class Main {
 
         usuarioLogado = new Jogador("Jonatas");
         usuarioAdversario = new Jogador("Kaique");
-        System.out.println("\uD83D\uDD2A");
         if (usuarioLogado != null) {
             comecarJogo();
         }
     }
 
     public static void comecarJogo() {
-        usuarioLogado.setPersonagens("⚔️", " ✵ ",
-                "➕");
-        usuarioAdversario.setPersonagens("\uD83D\uDDE1️", " ⚝ ",
-                "\uD83E\uDD0D");
+        esolherModo();
         Tabuleiro tabuleiro = new Tabuleiro();
         //para testes \/
 //        tabuleiro.getTabuleiro()[0][0].setPersonagem(new Suporte(usuarioLogado, "A"));
@@ -31,8 +27,44 @@ public class Main {
         controleDeJogo(tabuleiro, true);
     }
 
+    private static void esolherModo() {
+
+        int opcao;
+        do {
+            System.out.println("""
+                    Qual modo de jogo vocês querem jogar?
+                    [1] - Briga (4 Personagens Cada)
+                    [2] - Guerra Civil (6 Personagens Cada)
+                    [3] - Guerra Mundial (10 Personagens Cada)
+                    """);
+            opcao = sc.nextInt();
+            switch (opcao) {
+                case 1 -> {
+                    usuarioLogado.setPersonagensBriga("⚔", "✴",
+                            "➕");
+                    usuarioAdversario.setPersonagensBriga("🗡", "✡",
+                            "💉");
+                }
+                case 2 -> {
+                    usuarioLogado.setPersonagensCivil("⚔", "✴",
+                            "➕");
+                    usuarioAdversario.setPersonagensCivil("🗡", "✡",
+                            "💉");
+                }
+                case 3 -> {
+                    usuarioLogado.setPersonagensMundial("⚔", "✴",
+                            "➕");
+                    usuarioAdversario.setPersonagensMundial("🗡", "✡",
+                            "💉");
+                }
+                default -> System.out.println("Valor Inválido!");
+            }
+        }while(opcao < 1 || opcao > 3);
+    }
+
     public static void controleDeJogo(Tabuleiro tabuleiro, boolean posicoesDefinidas) {
-        for (int i = 1; i <= 20; i++) {
+        boolean parar = false;
+        for (int i = 1; !parar; i++) {
             Jogador jogador = usuarioLogado;
             Jogador adversario = usuarioAdversario;
             if (i % 2 == 0) {
@@ -42,10 +74,18 @@ public class Main {
             if (!posicoesDefinidas) {
                 if (!posicionamento(jogador, tabuleiro)) {
                     i--;
+                } else if(
+                        usuarioLogado.getPersonagens().toArray().length == 0 &&
+                                usuarioAdversario.getPersonagens().toArray().length == 0){
+                    parar = true;
                 }
             } else {
                 if (!escolheAcao(tabuleiro, jogador, adversario)) {
                     i--;
+                } else if (
+                        !tabuleiro.procuraPersonagem(usuarioAdversario) ||
+                                !tabuleiro.procuraPersonagem(usuarioLogado)) {
+                    parar = true;
                 }
             }
         }
@@ -58,9 +98,12 @@ public class Main {
 
         //mostrando o tabuleiro e os personagens
         System.out.println(tabuleiro);
-        System.out.println(jogador.getNome() + "! Escolha o personagem:" +
-                jogador.mostrarPersonagens());
-        opcao = sc.nextInt();
+        do{
+            System.out.println(jogador.getNome() + "! Escolha o personagem:" +
+                    jogador.mostrarPersonagens());
+            opcao = sc.nextInt();
+        } while(opcao < 1 || opcao > jogador.getPersonagens().toArray().length);
+
 
         //validando opcao de personagem
         if (opcao < 0 || opcao > jogador.getPersonagens().toArray().length) {
@@ -198,7 +241,7 @@ public class Main {
                 }
                 case 1 -> {
                     System.out.println(tabuleiro.mostraPosicoes(posicoes));
-                    umContraUm(posicoes, tabuleiro, adversario, personagem, opcao);
+                    umContraUm(posicoes, tabuleiro, adversario, personagem, acao);
                 }
                 case 2 -> {
                     System.out.println(tabuleiro.mostraPosicoes(posicoes));
@@ -308,8 +351,6 @@ public class Main {
         System.out.println(tabuleiro.getTabuleiro()[cAlvo][lAlvo].getPersonagem());
     }
 
-    //Tem que fazer algo para acabar o jogo ao nao ter mais personagem,
-    //alem de nao limitar as 20 rodadas de jogo
     //ao curar em area nao mostrar personagens inimigos como possiveis alvos
     //fazer metodos de login e cadastro
 }

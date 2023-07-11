@@ -91,7 +91,7 @@ public class Ocultista extends Personagem {
 
     @Override
     public String sendoAtacado() {
-        return "\uD83D\uDCA5";
+        return "🔥";
     }
 
 

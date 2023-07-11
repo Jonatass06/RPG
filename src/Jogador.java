@@ -10,7 +10,23 @@ public class Jogador {
         this.personagens = new ArrayList<>();
     }
 
-    public void setPersonagens(String simboloCombate, String simboloOculto, String simboloSuporte) {
+    public void setPersonagensBriga(String simboloCombate, String simboloOculto, String simboloSuporte) {
+        this.personagens = new ArrayList<>();
+        this.personagens.add(new Combatente(this, simboloCombate));
+        this.personagens.add(new Combatente(this, simboloCombate));
+        this.personagens.add(new Suporte(this, simboloSuporte));
+        this.personagens.add(new Ocultista(this, simboloOculto));
+    }
+    public void setPersonagensCivil(String simboloCombate, String simboloOculto, String simboloSuporte) {
+        this.personagens = new ArrayList<>();
+        this.personagens.add(new Combatente(this, simboloCombate));
+        this.personagens.add(new Combatente(this, simboloCombate));
+        this.personagens.add(new Combatente(this, simboloCombate));
+        this.personagens.add(new Suporte(this, simboloSuporte));
+        this.personagens.add(new Suporte(this, simboloSuporte));
+        this.personagens.add(new Ocultista(this, simboloOculto));
+    }
+    public void setPersonagensMundial(String simboloCombate, String simboloOculto, String simboloSuporte) {
         this.personagens = new ArrayList<>();
         this.personagens.add(new Combatente(this, simboloCombate));
         this.personagens.add(new Combatente(this, simboloCombate));
@@ -24,6 +40,7 @@ public class Jogador {
         this.personagens.add(new Ocultista(this, simboloOculto));
     }
 
+
     public String getNome() {
         return nome;
     }
@@ -33,7 +50,7 @@ public class Jogador {
         int i = 0;
         for (Personagem persona : this.personagens) {
             i++;
-            retorno += "[" + i + "] - " + persona;
+            retorno += "[" + i + "] - " + persona + "\n";
         }
         return retorno;
     }

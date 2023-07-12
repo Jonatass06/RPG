@@ -25,7 +25,7 @@ public class Tabuleiro {
 
             switch (i) {
                 case 1, 4 ->
-                    //obstaculos de 1 de tamanho
+                        //obstaculos de 1 de tamanho
                         this.tabuleiro[c][l].setObstaculo(new Obstaculo(sort.nextInt((400 - 100) + 1) + 100));
                 case 2, 5 -> {
                     //obstaculo de 2 de tamanho
@@ -56,7 +56,7 @@ public class Tabuleiro {
         if (c + 1 < 16) {
             range.add(tabuleiro[c + 1][l]);
         }
-        if ( l + 1 < 16) {
+        if (l + 1 < 16) {
             range.add(tabuleiro[c][l + 1]);
         }
         if (c - 1 >= 0) {
@@ -92,21 +92,21 @@ public class Tabuleiro {
         return range;
     }
 
-    public void removerPersonagem(Personagem personagem){
-        for(int l = 0; l < 16; l++){
-            for(int c = 0; c < 16; c++){
-                if(personagem == tabuleiro[c][l].getPersonagem()){
+    public void removerPersonagem(Personagem personagem) {
+        for (int l = 0; l < 16; l++) {
+            for (int c = 0; c < 16; c++) {
+                if (personagem == tabuleiro[c][l].getPersonagem()) {
                     tabuleiro[c][l].setPersonagem(null);
                 }
             }
         }
     }
 
-    public boolean procuraPersonagem(Jogador usuario){
-        for(int l = 0; l < 16; l++) {
+    public boolean procuraPersonagem(Jogador usuario) {
+        for (int l = 0; l < 16; l++) {
             for (int c = 0; c < 16; c++) {
                 if (tabuleiro[c][l].getPersonagem() != null
-                && tabuleiro[c][l].getPersonagem().getDono() == usuario) {
+                        && tabuleiro[c][l].getPersonagem().getDono() == usuario) {
                     return true;
                 }
             }

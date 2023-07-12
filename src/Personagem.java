@@ -56,7 +56,7 @@ public abstract class Personagem {
         return true;
     }
 
-    //0 == nao atacando; 1 = personagem oponente; 2 == personagem aliado; 3 range
+    //0 = nao atacando; 1 = personagem oponente; 2 == personagem aliado; 3 range;
     public abstract int tipoDeAcao(int opcao);
 
     public abstract String mostrarOpcoes();
@@ -81,22 +81,21 @@ public abstract class Personagem {
         percorrendoOTabuleiro(possivelPosicao, -1, tabuleiro, l, c, 2, opcao);
         percorrendoOTabuleiro(possivelPosicao, 1, tabuleiro, l, c, 2, opcao);
 
-        percorrendoOTabuleiroDiagonal(possivelPosicao, 1,1,tabuleiro,c, l, opcao);
-        percorrendoOTabuleiroDiagonal(possivelPosicao, -1,-1,tabuleiro,c, l, opcao);
-        percorrendoOTabuleiroDiagonal(possivelPosicao, 1,-1,tabuleiro,c, l, opcao);
-        percorrendoOTabuleiroDiagonal(possivelPosicao, -1,1,tabuleiro,c, l, opcao);
+        percorrendoOTabuleiroDiagonal(possivelPosicao, 1, 1, tabuleiro, c, l, opcao);
+        percorrendoOTabuleiroDiagonal(possivelPosicao, -1, -1, tabuleiro, c, l, opcao);
+        percorrendoOTabuleiroDiagonal(possivelPosicao, 1, -1, tabuleiro, c, l, opcao);
+        percorrendoOTabuleiroDiagonal(possivelPosicao, -1, 1, tabuleiro, c, l, opcao);
 
         return possivelPosicao;
     }
 
     private void percorrendoOTabuleiro(ArrayList<Posicao> possibilidades, int modificador,
-                                         Tabuleiro tabuleiro, int i, int j,
+                                       Tabuleiro tabuleiro, int i, int j,
                                        int direcaoAtaque, int opcao) {
 
         //distancia de acordo com a acao
         int distancia = switch (tipoDeAcao(opcao)) {
             case 0 -> agilidade * 3;
-            case 1, 2 -> 1;
             case 3 -> 9;
             default -> 1;
         };
@@ -104,15 +103,15 @@ public abstract class Personagem {
         //calcula os possiveis movimento ou ataques para a direita, esquerda, cima e baixo
         for (int k = (i + modificador < 16) && (i + modificador) >= 0 ?
                 i + modificador : i;
-                k <= i + distancia && k >=0 && k < 16 &&
-                k >= i - distancia; k += modificador) {
+             k <= i + distancia && k >= 0 && k < 16 &&
+                     k >= i - distancia; k += modificador) {
 
             //1 = direita esquerda / 2 = cima baixo
             Posicao posicaoNoTabuleiro = direcaoAtaque == 1 ?
                     tabuleiro.getTabuleiro()[k][j] :
                     tabuleiro.getTabuleiro()[j][k];
 
-            if(diferenciandoOsTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)){
+            if (diferenciandoOsTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)) {
                 break;
             }
         }
@@ -147,13 +146,12 @@ public abstract class Personagem {
         //range
         if (tipoDeAcao(opcao) == 3) {
             //isso significa que é a cura do suporte
-            if(opcao == 2){
+            if (opcao == 2) {
                 possibilidades.add(posicaoNoTabuleiro);
-            }
-            else{
-                if(posicaoNoTabuleiro.getPersonagem() == null
+            } else {
+                if (posicaoNoTabuleiro.getPersonagem() == null
                         || posicaoNoTabuleiro.getPersonagem().dono != this.dono
-                ){
+                ) {
                     possibilidades.add(posicaoNoTabuleiro);
                 }
             }
@@ -168,21 +166,20 @@ public abstract class Personagem {
         //distancia de acordo com a acao
         int distancia = switch (tipoDeAcao(opcao)) {
             case 0 -> agilidade * 3;
-            case 1, 2 -> 1;
             case 3 -> 9;
             default -> 1;
         };
 
-        for(int k = 1; k <= distancia; k ++){
+        for (int k = 1; k <= distancia; k++) {
             int c = i + (modificadorI * k);
             int l = j + (modificadorJ * k);
-            if(c >= 0 && l >= 0 && c < 16 && l < 16){
+            if (c >= 0 && l >= 0 && c < 16 && l < 16) {
                 Posicao posicaoNoTabuleiro = tabuleiro.getTabuleiro()[c][l];
 
-                if(diferenciandoOsTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)){
+                if (diferenciandoOsTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)) {
                     break;
                 }
-            } else{
+            } else {
                 break;
             }
         }
@@ -198,15 +195,9 @@ public abstract class Personagem {
         // 2 - bloqueio / 1 - esquiva
         switch (opcaoDefesa) {
             case 2 -> diminuirDano = defesaAdversario;
-            case 1-> defesaAdversario += posicao.getPersonagem() != null ?
+            case 1 -> defesaAdversario += posicao.getPersonagem() != null ?
                     posicao.getPersonagem().agilidade * 2 : 0;
         }
-
-
-        System.out.println(opcaoDefesa);
-        System.out.println(posicao.getPersonagem());
-        System.out.println(dadoTeste);
-        System.out.println(defesaAdversario);
 
         //dano no obstaculo
         if (posicao.getObstaculo() != null) {
@@ -226,7 +217,6 @@ public abstract class Personagem {
                         this.buff * 2 - diminuirDano;
                 dano = dano < 0 ? 0 : dano;
                 posicao.getPersonagem().receberDano(dano, tabuleiro);
-                System.out.println("dano "+ dano);
             }
             return true;
             //dano normal
@@ -237,7 +227,6 @@ public abstract class Personagem {
                         this.buff - diminuirDano;
                 dano = dano < 0 ? 0 : dano;
                 posicao.getPersonagem().receberDano(dano, tabuleiro);
-                System.out.println("dano "+ dano);
             }
             return true;
         }
@@ -260,7 +249,7 @@ public abstract class Personagem {
     }
 
     protected void receberDano(int dano, Tabuleiro tabuleiro) {
-        if(this.vida - dano <= 0){
+        if (this.vida - dano <= 0) {
             tabuleiro.removerPersonagem(this);
         } else {
             this.vida -= dano;
@@ -289,10 +278,10 @@ public abstract class Personagem {
 
     @Override
     public String toString() {
-        if(buff != 0){
-            return simbolo + " - PV: "+ vida + " - PC: " + pontosCombate + " - Buff: " + buff;
-        } else{
-            return simbolo + " - PV: "+ vida + " - PC: " + pontosCombate;
+        if (buff != 0) {
+            return simbolo + " - PV: " + vida + " - PC: " + pontosCombate + " - Buff: " + buff;
+        } else {
+            return simbolo + " - PV: " + vida + " - PC: " + pontosCombate;
         }
     }
 

@@ -30,10 +30,8 @@ public class Combatente extends Personagem {
                 bater(posicao.get(0), dadoDano, defesa, tabuleiro);
                 return true;
             }
-            return bater(posicao.get(0), dadoDano, defesa, tabuleiro);
-        } else {
-            return bater(posicao.get(0), dadoDano, defesa, tabuleiro);
         }
+        return bater(posicao.get(0), dadoDano, defesa, tabuleiro);
 
     }
 

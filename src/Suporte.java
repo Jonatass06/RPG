@@ -33,10 +33,9 @@ public class Suporte extends Personagem {
     public int tipoDeAcao(int opcao) {
         //0 == nao atacando; 1 = personagem oponente; 2 == personagem aliado; 3 range
         return switch (opcao) {
-            case 1 -> 2;
+            case 1, 4 -> 2;
             case 2 -> 3;
             case 3 -> 1;
-            case 4 -> 2;
             default -> 0;
         };
     }

@@ -9,9 +9,9 @@ public class Main {
 
     public static void main(String[] args) {
         while (true) {
-            do {
+            while(usuarioLogado == null) {
                 menuPrincipal();
-            } while (usuarioLogado == null);
+            }
             int opcao;
             do{
                 System.out.println("""
@@ -370,12 +370,21 @@ public class Main {
         do {
             System.out.print("\n[0] Nada\n" + personagem.mostrarOpcoes() + "\nO que você deseja fazer: ");
             acao = sc.nextInt();
+
             posicoes = personagem.possiveisPosicoes(tabuleiro, acao);
-            if(posicoes.toArray().length == 0){
-                System.out.println("Você não pode fazer isso aqui!");
-            }
+
             if(acao > 4 || acao < 0){
                 System.out.println("Valor inválido! Tente Novamente!");
+            }else{
+                if(posicoes.toArray().length == 0){
+                    System.out.println("Você não pode fazer isso aqui!");
+                }
+                else{
+                    if(!personagem.verificaPC(acao)){
+                        System.out.println("Você não tem PC o suficiente para isso!");
+                        acao = -1;
+                    }
+                }
             }
 
         } while (acao > 4 || acao < 0 || posicoes.toArray().length == 0);

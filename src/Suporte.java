@@ -40,6 +40,15 @@ public class Suporte extends Personagem {
         };
     }
 
+    @Override
+    public boolean verificaPC(int acao){
+        int precisa = switch(acao){
+            case 2 -> 2;
+            default -> 0;
+        };
+        return this.getPC() >= precisa;
+    }
+
     private void curar(ArrayList<Posicao> posicoes) {
         int maior = 0;
         for (int i = 0; i < this.getIntelecto(); i++) {

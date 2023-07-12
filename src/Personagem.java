@@ -236,6 +236,8 @@ public abstract class Personagem {
         }
     }
 
+    public abstract boolean verificaPC(int acao);
+
     protected boolean bater(Posicao posicao, int defesa, int dadoDano, Tabuleiro tabuleiro) {
         int maior = 0;
 
@@ -293,5 +295,9 @@ public abstract class Personagem {
 
     public String getSimbolo() {
         return simbolo;
+    }
+
+    public int getPC() {
+        return pontosCombate;
     }
 }

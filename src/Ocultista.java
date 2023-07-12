@@ -80,6 +80,16 @@ public class Ocultista extends Personagem {
     }
 
     @Override
+    public boolean verificaPC(int acao){
+        int precisa = switch(acao){
+            case 3 -> 2;
+            case 4 -> 2;
+            default -> 0;
+        };
+        return this.getPC() >= precisa;
+    }
+
+    @Override
     public String mostrarOpcoes() {
         return """
                 [1] - Descansar (+2)

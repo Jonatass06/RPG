@@ -32,8 +32,19 @@ public class Combatente extends Personagem {
             }
         }
         return bater(posicao.get(0), dadoDano, defesa, tabuleiro);
-
     }
+
+    @Override
+    public boolean verificaPC(int acao){
+        int precisa = switch(acao){
+            case 2 -> 2;
+            case 3 -> 2;
+            case 4 -> 4;
+            default -> 0;
+            };
+        return this.getPC() >= precisa;
+    }
+
 
     @Override
     public int tipoDeAcao(int opcao) {

@@ -38,23 +38,8 @@ public abstract class Personagem {
         this.pontosCombate = esforco * 8;
     }
 
-
-    //questionar se isso é uma boa pratica
-    /*
-     * colocar um metodo em cobatente que nao recebe defesa porem nao faz nada,
-     * tirar o metodo de personagem que nao recebe defesa e colocalo apenas em ocultista e
-     * suporte ou fazer um metodo nao abstrato porem sobrescrito*/
-
     public abstract boolean confirmarAcoes(int acao, ArrayList<Posicao> posicoes,
                                            int defesa, Tabuleiro tabuleiro);
-
-    public boolean confirmarAcoes(int acao) {
-        return true;
-    }
-
-    public boolean confirmarAcoes(int acao, ArrayList<Posicao> posicoes) {
-        return true;
-    }
 
     //0 = nao atacando; 1 = personagem oponente; 2 == personagem aliado; 3 range;
     public abstract int tipoDeAcao(int opcao);
@@ -76,22 +61,16 @@ public abstract class Personagem {
             }
         }
 
-        percorrendoOTabuleiro(possivelPosicao, -1, tabuleiro, c, l, 1, opcao);
-        percorrendoOTabuleiro(possivelPosicao, 1, tabuleiro, c, l, 1, opcao);
-        percorrendoOTabuleiro(possivelPosicao, -1, tabuleiro, l, c, 2, opcao);
-        percorrendoOTabuleiro(possivelPosicao, 1, tabuleiro, l, c, 2, opcao);
+        percorrendoOTabuleiro(possivelPosicao, tabuleiro, c, l, 1, opcao);
+        percorrendoOTabuleiro(possivelPosicao, tabuleiro, l, c, 2, opcao);
 
-        percorrendoOTabuleiroDiagonal(possivelPosicao, 1, 1, tabuleiro, c, l, opcao);
-        percorrendoOTabuleiroDiagonal(possivelPosicao, -1, -1, tabuleiro, c, l, opcao);
-        percorrendoOTabuleiroDiagonal(possivelPosicao, 1, -1, tabuleiro, c, l, opcao);
-        percorrendoOTabuleiroDiagonal(possivelPosicao, -1, 1, tabuleiro, c, l, opcao);
+        percorrendoDiagonal(possivelPosicao, tabuleiro, c, l, opcao);
 
         return possivelPosicao;
     }
 
-    private void percorrendoOTabuleiro(ArrayList<Posicao> possibilidades, int modificador,
-                                       Tabuleiro tabuleiro, int i, int j,
-                                       int direcaoAtaque, int opcao) {
+    private void percorrendoOTabuleiro(ArrayList<Posicao> possibilidades, Tabuleiro tabuleiro,
+                                       int i, int j, int direcaoAtaque, int opcao) {
 
         //distancia de acordo com a acao
         int distancia = switch (tipoDeAcao(opcao)) {
@@ -100,31 +79,41 @@ public abstract class Personagem {
             default -> 1;
         };
 
-        //calcula os possiveis movimento ou ataques para a direita, esquerda, cima e baixo
-        for (int k = (i + modificador < 16) && (i + modificador) >= 0 ?
-                i + modificador : i;
-             k <= i + distancia && k >= 0 && k < 16 &&
-                     k >= i - distancia; k += modificador) {
+        for (int modificador = -1; modificador <= 1; modificador += 2) {
 
-            //1 = direita esquerda / 2 = cima baixo
-            Posicao posicaoNoTabuleiro = direcaoAtaque == 1 ?
-                    tabuleiro.getTabuleiro()[k][j] :
-                    tabuleiro.getTabuleiro()[j][k];
+            //calcula os possiveis movimento ou ataques para a direita, esquerda, cima e baixo
+            for (int k = (i + modificador < 16) && (i + modificador) >= 0 ?
+                    i + modificador : i;
+                 k <= i + distancia && k >= 0 && k < 16 &&
+                         k >= i - distancia; k += modificador) {
 
-            if (diferenciandoOsTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)) {
-                break;
+                //1 = direita esquerda / 2 = cima baixo
+                Posicao posicaoNoTabuleiro = direcaoAtaque == 1 ?
+                        tabuleiro.getTabuleiro()[k][j] :
+                        tabuleiro.getTabuleiro()[j][k];
+
+                if (diferenciandoTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)) {
+                    break;
+                }
             }
         }
     }
 
-    private boolean diferenciandoOsTiposDeAcoes(Posicao posicaoNoTabuleiro, int opcao,
-                                                ArrayList<Posicao> possibilidades) {
+    public boolean movimentando(Posicao posicaoNoTabuleiro, ArrayList<Posicao> possibilidades) {
+        if (posicaoNoTabuleiro.getPersonagem() == null &&
+                posicaoNoTabuleiro.getObstaculo() == null) {
+            possibilidades.add(posicaoNoTabuleiro);
+        } else {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean diferenciandoTiposDeAcoes(Posicao posicaoNoTabuleiro, int opcao,
+                                              ArrayList<Posicao> possibilidades) {
         //nao é ataque
         if (tipoDeAcao(opcao) == 0) {
-            if (posicaoNoTabuleiro.getPersonagem() == null &&
-                    posicaoNoTabuleiro.getObstaculo() == null) {
-                possibilidades.add(posicaoNoTabuleiro);
-            } else if (!(this instanceof Ocultista)) {
+            if (movimentando(posicaoNoTabuleiro, possibilidades)) {
                 return true;
             }
         }
@@ -136,6 +125,7 @@ public abstract class Personagem {
                 possibilidades.add(posicaoNoTabuleiro);
             }
         }
+
         //personagem amigo
         if (tipoDeAcao(opcao) == 2) {
             if (posicaoNoTabuleiro.getPersonagem() != null &&
@@ -159,9 +149,8 @@ public abstract class Personagem {
         return false;
     }
 
-    private void percorrendoOTabuleiroDiagonal(ArrayList<Posicao> possibilidades, int modificadorI,
-                                               int modificadorJ, Tabuleiro tabuleiro,
-                                               int i, int j, int opcao) {
+    private void percorrendoDiagonal(ArrayList<Posicao> possibilidades, Tabuleiro tabuleiro,
+                                     int i, int j, int opcao) {
 
         //distancia de acordo com a acao
         int distancia = switch (tipoDeAcao(opcao)) {
@@ -170,17 +159,22 @@ public abstract class Personagem {
             default -> 1;
         };
 
-        for (int k = 1; k <= distancia; k++) {
-            int c = i + (modificadorI * k);
-            int l = j + (modificadorJ * k);
-            if (c >= 0 && l >= 0 && c < 16 && l < 16) {
-                Posicao posicaoNoTabuleiro = tabuleiro.getTabuleiro()[c][l];
+        for (int modificadorI = -1; modificadorI <= 1; modificadorI += 2) {
+            for (int modificadorJ = -1; modificadorJ <= 1; modificadorJ += 2) {
 
-                if (diferenciandoOsTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)) {
-                    break;
+                for (int k = 1; k <= distancia; k++) {
+                    int c = i + (modificadorI * k);
+                    int l = j + (modificadorJ * k);
+                    if (c >= 0 && l >= 0 && c < 16 && l < 16) {
+                        Posicao posicaoNoTabuleiro = tabuleiro.getTabuleiro()[c][l];
+
+                        if (diferenciandoTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
                 }
-            } else {
-                break;
             }
         }
     }

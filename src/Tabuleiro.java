@@ -136,7 +136,7 @@ public class Tabuleiro {
     }
 
     public String mostraPosicoes(ArrayList<Posicao> posicoes) {
-        String retorno = "    0   1  2  3   4  5  6   7  8  9  10  11 12  13 14 15 \n";
+        String retorno = "    0    1   2   3    4   5   6   7    8   9   10  11  12  13  14  15 \n";
         for (int i = 0; i < 16; i++) {
             retorno += i < 10 ? i + "   " : i + "  ";
             for (int j = 0; j < 16; j++) {

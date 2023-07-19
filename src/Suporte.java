@@ -9,24 +9,21 @@ public class Suporte extends Personagem {
     @Override
     public boolean confirmarAcoes(int acao, ArrayList<Posicao> posicoes,
                                   int defesa, Tabuleiro tabuleiro) {
-        // 3 - Atacar
-        return bater(posicoes.get(0), defesa, 4, tabuleiro);
-    }
-
-    @Override
-    public boolean confirmarAcoes(int acao, ArrayList<Posicao> posicoes) {
         // 1 - Curar personagem
         // 2 - Curar em area
         // 4 - buff
-        switch (acao) {
-            case 1 -> curar(posicoes);
-            case 2 -> {
-                curar(posicoes);
-                this.mudaPontosCombate(-2);
-            }
-            case 4 -> buffar(posicoes.get(0));
+        // 3 - Atacar
+
+        if(acao == 2){
+            this.mudaPontosCombate(-2);
         }
-        return true;
+        return  switch (acao) {
+            case 1 -> curar(posicoes);
+            case 2 -> curar(posicoes);
+            case 3 -> bater(posicoes.get(0), defesa, 4, tabuleiro);
+            case 4 -> buffar(posicoes.get(0));
+            default -> false;
+        };
     }
 
     @Override
@@ -49,7 +46,7 @@ public class Suporte extends Personagem {
         return this.getPC() >= precisa;
     }
 
-    private void curar(ArrayList<Posicao> posicoes) {
+    private boolean curar(ArrayList<Posicao> posicoes) {
         int maior = 0;
         for (int i = 0; i < this.getIntelecto(); i++) {
             int dado = sort.nextInt(20) + 1;
@@ -61,12 +58,15 @@ public class Suporte extends Personagem {
                 posicao.getPersonagem().cura(maior / 3);
             }
         }
+
+        return true;
     }
 
-    private void buffar(Posicao posicao) {
+    private boolean buffar(Posicao posicao) {
         if (posicao.getPersonagem() != null) {
             posicao.getPersonagem().setBuff(3);
         }
+        return true;
     }
 
     @Override

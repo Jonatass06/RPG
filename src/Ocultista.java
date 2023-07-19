@@ -11,9 +11,16 @@ public class Ocultista extends Personagem {
     @Override
     public boolean confirmarAcoes(int acao, ArrayList<Posicao> posicoes,
                                   int defesa, Tabuleiro tabuleiro) {
+        // 1-Descancar - ganha 2 pc
+        // 3-Se Curar - perde 2 pc
         // 2- Bater
         // 4- Enfeiticar
         switch (acao) {
+            case 1 -> this.mudaPontosCombate(2);
+            case 3 -> {
+                this.mudaPontosCombate(-2);
+                this.seCurar();
+            }
             case 2 -> {
                 return this.bater(posicoes.get(0), defesa, 6, tabuleiro);
             }
@@ -21,27 +28,9 @@ public class Ocultista extends Personagem {
                 this.mudaPontosCombate(-2);
                 return this.enfeiticar(posicoes, defesa, tabuleiro);
             }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean confirmarAcoes(int acao) {
-        // 1-Descancar - ganha 2 pc
-        // 3-Se Curar - perde 2 pc
-        switch (acao) {
-            case 1 -> {
-                this.mudaPontosCombate(2);
-                return true;
             }
-            case 3 -> {
-                this.mudaPontosCombate(-2);
-                this.seCurar();
-                return true;
-            }
+            return (acao == 1 || acao == 3);
         }
-        return false;
-    }
 
     @Override
     public int tipoDeAcao(int opcao) {
@@ -51,6 +40,15 @@ public class Ocultista extends Personagem {
             case 4 -> 3;
             default -> 0;
         };
+    }
+
+    @Override
+    public boolean movimentando(Posicao posicaoNoTabuleiro, ArrayList<Posicao> possibilidades){
+        if (posicaoNoTabuleiro.getPersonagem() == null &&
+                posicaoNoTabuleiro.getObstaculo() == null) {
+            possibilidades.add(posicaoNoTabuleiro);
+        }
+        return false;
     }
 
     private boolean enfeiticar(ArrayList<Posicao> posicoes, int defesa, Tabuleiro tabuleiro) {

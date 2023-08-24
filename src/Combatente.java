@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Combatente extends Personagem {
 
     public Combatente(Jogador jogador, String simbolo) {
-        super(4, 4, 1, 1, 2, jogador, simbolo);
+        super(4, 4, 1, 2, jogador, simbolo);
     }
 
     @Override

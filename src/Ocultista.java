@@ -5,7 +5,7 @@ public class Ocultista extends Personagem {
     public static Random sort = new Random();
 
     public Ocultista(Jogador jogador, String simbolo) {
-        super(1, 2, 2, 3, 4, jogador, simbolo);
+        super(1, 2, 2, 4, jogador, simbolo);
     }
 
     @Override

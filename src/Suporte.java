@@ -2,8 +2,12 @@ import java.util.ArrayList;
 
 public class Suporte extends Personagem {
 
+    private int intelecto;
+
+
     public Suporte(Jogador jogador, String simbolo) {
-        super(1, 1, 4, 4, 2, jogador, simbolo);
+        super(1, 1, 4, 2, jogador, simbolo);
+        this.intelecto = 4;
     }
 
     @Override
@@ -48,7 +52,7 @@ public class Suporte extends Personagem {
 
     private boolean curar(ArrayList<Posicao> posicoes) {
         int maior = 0;
-        for (int i = 0; i < this.getIntelecto(); i++) {
+        for (int i = 0; i < this.intelecto; i++) {
             int dado = sort.nextInt(20) + 1;
             maior = dado > maior ? dado : maior;
         }

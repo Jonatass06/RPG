@@ -13,19 +13,17 @@ public abstract class Personagem {
     private int forca;
     private int vigor;
     private int agilidade;
-    private int intelecto;
     private int esforco;
     //associacao com jogador
     private Jogador dono;
     //simbolo para tostring
     private String simbolo;
 
-    public Personagem(int forca, int vigor, int agilidade, int intelecto,
+    public Personagem(int forca, int vigor, int agilidade,
                       int esforco, Jogador dono, String simbolo) {
         this.forca = forca;
         this.vigor = vigor;
         this.agilidade = agilidade;
-        this.intelecto = intelecto;
         this.esforco = esforco;
         this.buff = 0;
         this.dono = dono;
@@ -264,9 +262,9 @@ public abstract class Personagem {
         this.vida += cura;
     }
 
-    public int getIntelecto() {
-        return intelecto;
-    }
+//    public int getIntelecto() {
+//        return intelecto;
+//    }
 
     protected void setBuff(int buff) {
         this.buff = buff;

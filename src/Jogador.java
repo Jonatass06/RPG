@@ -28,36 +28,8 @@ public class Jogador {
         return this.senha.equals(senha);
     }
 
-    public void setPersonagensBriga(String simboloCombate, String simboloOculto, String simboloSuporte) {
-        this.personagens = new ArrayList<>();
-        this.personagens.add(new Combatente(this, simboloCombate));
-        this.personagens.add(new Combatente(this, simboloCombate));
-        this.personagens.add(new Suporte(this, simboloSuporte));
-        this.personagens.add(new Ocultista(this, simboloOculto));
-    }
-
-    public void setPersonagensCivil(String simboloCombate, String simboloOculto, String simboloSuporte) {
-        this.personagens = new ArrayList<>();
-        this.personagens.add(new Combatente(this, simboloCombate));
-        this.personagens.add(new Combatente(this, simboloCombate));
-        this.personagens.add(new Combatente(this, simboloCombate));
-        this.personagens.add(new Suporte(this, simboloSuporte));
-        this.personagens.add(new Suporte(this, simboloSuporte));
-        this.personagens.add(new Ocultista(this, simboloOculto));
-    }
-
-    public void setPersonagensMundial(String simboloCombate, String simboloOculto, String simboloSuporte) {
-        this.personagens = new ArrayList<>();
-        this.personagens.add(new Combatente(this, simboloCombate));
-        this.personagens.add(new Combatente(this, simboloCombate));
-        this.personagens.add(new Combatente(this, simboloCombate));
-        this.personagens.add(new Combatente(this, simboloCombate));
-        this.personagens.add(new Combatente(this, simboloCombate));
-        this.personagens.add(new Suporte(this, simboloSuporte));
-        this.personagens.add(new Suporte(this, simboloSuporte));
-        this.personagens.add(new Suporte(this, simboloSuporte));
-        this.personagens.add(new Ocultista(this, simboloOculto));
-        this.personagens.add(new Ocultista(this, simboloOculto));
+    public void addPersonagem(Personagem personagem) {
+        this.personagens.add(personagem);
     }
 
     public String getNome() {

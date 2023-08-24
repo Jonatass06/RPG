@@ -136,6 +136,10 @@ public class Tabuleiro {
     }
 
     public String mostraPosicoes(ArrayList<Posicao> posicoes) {
+
+        String corVermelha = "\u001B[31m";
+        String corPadrao = "\u001B[0m";
+
         String retorno = "    0    1   2   3    4   5   6   7    8   9   10  11  12  13  14  15 \n";
         for (int i = 0; i < 16; i++) {
             retorno += i < 10 ? i + "   " : i + "  ";
@@ -145,7 +149,7 @@ public class Tabuleiro {
                     //mostra posicoes possiveis
                     if (posicao == posicaoNoTabuleiro) {
                         if (posicao.getPersonagem() != null) {
-                            retorno += posicao.getPersonagem().sendoAtacado();
+                            retorno += corVermelha + posicao.getPersonagem().getSimbolo() + corPadrao;
                             break;
                         } else if (posicao.getObstaculo() != null) {
                             retorno += "⚪";

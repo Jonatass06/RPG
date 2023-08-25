@@ -1,10 +1,10 @@
 import java.util.ArrayList;
 
 public class Partida {
-    ArrayList<Jogador> jogadores;
-    ModoDeJogo modoDeJogo;
-    Tabuleiro tabuleiro;
-    int turno;
+    private ArrayList<Jogador> jogadores;
+    private ModoDeJogo modoDeJogo;
+    private Tabuleiro tabuleiro;
+    private int turno;
 
     public Partida(Jogador jogador, Jogador adversario, ModoDeJogo modoDeJogo) {
         this.jogadores = new ArrayList<>();
@@ -14,6 +14,10 @@ public class Partida {
         this.tabuleiro = new Tabuleiro();
         this.turno = 0;
         this.gerarPersonagens();
+    }
+
+    public Tabuleiro getTabuleiro() {
+        return tabuleiro;
     }
 
     private void gerarPersonagens() {
@@ -31,6 +35,10 @@ public class Partida {
         }
     }
 
+    public ArrayList<Jogador> getJogadores() {
+        return jogadores;
+    }
+
     public Jogador jogadorNaVez(){
         return jogadores.get(turno % 2);
     }
@@ -39,6 +47,9 @@ public class Partida {
         return jogadores.get((turno + 1) % 2);
     }
 
+    public ModoDeJogo getModoDeJogo() {
+        return modoDeJogo;
+    }
 
     public void mudarTurno(){
         turno++;

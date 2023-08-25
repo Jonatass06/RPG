@@ -167,7 +167,11 @@ public class Main {
 
         partida = new Partida(usuarioLogado, usuarioAdversario, modoDeJogo);
 
-        controleDeJogo(false);
+        posicionamento();
+        do {
+            controleDeJogo();
+            partida.mudarTurno();
+        } while (verificaVencedor());
 
         usuarioAdversario = null;
     }
@@ -203,95 +207,108 @@ public class Main {
         return modoDeJogo;
     }
 
-    public static void controleDeJogo(boolean posicoesDefinidas) {
-        boolean parar = false;
+    public static void controleDeJogo() {
 
-        for (int i = 1; !parar; i++) {
-            Jogador jogador = usuarioLogado;
-            Jogador adversario = usuarioAdversario;
+        Personagem personagem = escolherPersonagem();
+        escolheAcao(personagem);
 
-            //controle de rodada
-            if (i % 2 == 0) {
-                adversario = usuarioLogado;
-                jogador = usuarioAdversario;
-            }
+    }
 
-            //nesse if nos definimos as posicoes de todos os personagens
-            if (!posicoesDefinidas) {
-                //caso o jogador cancele o posicionamento
-                if (!posicionamento(jogador)) {
-                    i--;
-                } else if (
-                    //aqui definimos que os personagens ja estao com posicoes definidas
-                        usuarioLogado.getPersonagens().toArray().length == 0 &&
-                                usuarioAdversario.getPersonagens().toArray().length == 0) {
-                    System.out.println("Que os jogos comecem!");
-                    posicoesDefinidas = true;
-                }
-                //aqui é de fato o jogo
-            } else {
-                //caso o jogador desista de agir com o personagem
-                if (!escolhePersonagem(jogador, adversario)) {
-                    i--;
-                    //caso acabe o jogo!
-                } else if (
-                        !tabuleiro.procuraPersonagem(usuarioAdversario) ||
-                                !tabuleiro.procuraPersonagem(usuarioLogado)) {
-                    parar = true;
-                    System.out.println(verificaVencedor());
+    boolean parar = false;
+    boolean posicoesDefinidas = false;
+
+
+    //caso o jogador desista de agir com o personagem
+        if(!
+
+    escolhePersonagem(jogador, adversario))
+
+    {
+        i--;
+        //caso acabe o jogo!
+    } else if(
+            !tabuleiro.procuraPersonagem(usuarioAdversario)||
+            !tabuleiro.procuraPersonagem(usuarioLogado))
+
+    {
+        parar = true;
+        System.out.println(verificaVencedor());
+    }
+
+
+}
+
+    public static void posicionamento() {
+        for (int i = 0; i < partida.getModoDeJogo().getQtdePersonagens(); i++) {
+
+            for (int j = 0; j < 2; j++) {
+                System.out.println(partida.getTabuleiro());
+                Jogador jogador = partida.getJogadores().get(j);
+                Personagem personagem = escolherPersonagem(jogador);
+                Posicao posicao;
+                posicao = escolherPosicao();
+                if (posicao == null) {
+                    j--;
+                } else {
+                    adicionarPersonagem(personagem, posicao);
                 }
             }
         }
-        partida.mudarTurno();
     }
 
-    public static boolean posicionamento(Jogador jogador) {
-
-        int c, l, opcao;
-
-        //mostrando o tabuleiro e os personagens
-        System.out.println(tabuleiro);
-        do {
-            System.out.println(jogador.getNome() + "! Escolha o personagem:" +
-                    jogador.mostrarPersonagens());
-            opcao = sc.nextInt();
-
-            if (opcao < 1 || opcao > jogador.getPersonagens().toArray().length) {
-                System.out.println("Valor inserido inválido!");
-            }
-
-        } while (opcao < 1 || opcao > jogador.getPersonagens().toArray().length);
-
-        do {
-            System.out.print("Em qual coluna você deseja adiciona-lo? (-1 - Cancelar) ");
-            c = sc.nextInt();
-            if (c == -1) {
-                return false;
-            }
-            System.out.print("Em qual linha você deseja adiciona-lo? (-1 - Cancelar) ");
-            l = sc.nextInt();
-            if (l == -1) {
-                return false;
-            }
-        } while (!verificaDisponivel(c, l));
-
-        tabuleiro.getTabuleiro()[c][l].setPersonagem(
-                jogador.getPersonagem(opcao));
-        jogador.tiraPersonagem(jogador.getPersonagem(opcao));
-        return true;
-
+    private static void adicionarPersonagem(Personagem personagem, Posicao posicao) {
+        posicao.setPersonagem(personagem);
+        personagem.setPosicao(posicao);
     }
 
-    public static boolean verificaDisponivel(int c, int l) {
-        if (c < 0 || c > 15 || l < 0 || l > 15) {
+    public static Personagem escolherPersonagem() {
+        Jogador jogador = partida.jogadorNaVez();
+        int opcao;
+        do {
+            opcao = selecionaPersonagem(jogador);
+        } while (opcao < 1 || opcao > jogador.getPersonagens().size());
+
+        return jogador.getPersonagem(opcao);
+    }
+
+    //trocar os nomes
+    public static int selecionaPersonagem(Jogador jogador) {
+        int opcao;
+        System.out.println(jogador.getNome() + "! Escolha o personagem:" +
+                jogador.mostrarPersonagens());
+        opcao = sc.nextInt();
+
+        if (opcao < 1 || opcao > jogador.getPersonagens().size()) {
+            System.out.println("Valor inserido inválido!");
+        }
+        return opcao;
+    }
+
+
+    public static Personagem escolherPersonagem(Jogador jogador) {
+        Personagem personagem = null;
+        int opcao;
+        do {
+            opcao = selecionaPersonagem(jogador);
+            if (opcao < 1 || opcao > jogador.getPersonagens().size()) {
+                personagem = jogador.getPersonagem(opcao);
+            }
+        } while (personagem.getPosicao() != null);
+
+        return personagem;
+    }
+
+
+    public static boolean verificaDisponivel(Posicao posicao) {
+        if (posicao == null) {
             System.out.println("Algum indice que voce inseriu estava invalido\n" +
                     "Digite Novamente:");
             return false;
-        } else if (tabuleiro.getTabuleiro()[c][l].getPersonagem() != null) {
+        } else if (posicao.getPersonagem() != null) {
             System.out.println("Já existe um personagem nesse lugar! \n" +
                     "Digite Novamente:");
             return false;
-        } else if (tabuleiro.getTabuleiro()[c][l].getObstaculo() != null) {
+        } else if (posicao.getObstaculo() != null) {
             System.out.println("Existe um obstaculo nesse lugar!\n" +
                     "Digite Novamente:");
             return false;
@@ -299,149 +316,93 @@ public class Main {
         return true;
     }
 
-    public static boolean escolhePersonagem(Jogador jogador, Jogador adversario) {
-        System.out.println(jogador.getNome() + ", com qual personagem você deseja agir?");
-        System.out.println(tabuleiro);
-        boolean parar = false;
-        Personagem personagem;
+    public static Posicao escolherPosicao() {
+        Posicao posicao;
         int c, l;
         do {
-            do {
-                System.out.print("Digite a coluna: ");
-                c = sc.nextInt();
-                System.out.print("Digite a linha: ");
-                l = sc.nextInt();
-                if (c < 0 || c > 15 || l > 15 || l < 0) {
-                    System.out.println("Algum dos valores inseridos é inválido!");
-                }
-            } while (c < 0 || c > 15 || l > 15 || l < 0);
-
-            personagem = tabuleiro.getTabuleiro()[c][l].getPersonagem();
-
-            if (personagem == null) {
-                System.out.println("Você não selecionou um personagem!");
-            } else {
-                if (personagem.getDono() == jogador) {
-                    parar = true;
-                } else {
-                    System.out.println("Esse personagem não é seu!");
-                }
+            System.out.print("Em qual coluna você deseja adiciona-lo? (-1 - Cancelar) ");
+            c = sc.nextInt();
+            if (c == -1) {
+                return null;
             }
-        } while (!parar);
-
-        System.out.println(tabuleiro.getTabuleiro()[c][l].getPersonagem());
-        int opcao = escolheAcao();
-
-        return opcao == 0 ?
-                verificaAcao(personagem, adversario) :
-                movimentar(personagem, c, l);
-
+            System.out.print("Em qual linha você deseja adiciona-lo? (-1 - Cancelar) ");
+            l = sc.nextInt();
+            if (l == -1) {
+                return null;
+            }
+            posicao = partida.getTabuleiro().getPosicao(c, l);
+        } while (!verificaDisponivel(posicao));
+        return posicao;
     }
 
-    public static int escolheAcao() {
+    public static int escolheAcao(Personagem personagem) {
         int opcao;
+        boolean repetir;
+        ArrayList<Posicao> posicoes;
         do {
             System.out.println("""
                     Você deseja:
-                    [0] Agir
-                    [1] Se Mover
-                    """);
+                    [0] Se Mover
+                    """ +
+                    personagem.mostrarOpcoes()
+                    + "\n[5] Nada"
+            );
             opcao = sc.nextInt();
-            if (opcao < 0 || opcao > 1) {
-                System.out.println("Valor inválido!");
+            if (!personagem.verificaPC(opcao)) {
+                System.out.println("Você não tem PC o suficiente para isso!");
+                opcao = -1;
             }
-        } while (opcao > 1 || opcao < 0);
+            repetir = acaoPorTipo(personagem, opcao);
+        } while (opcao < 0 || opcao > 5 || repetir);
+
         return opcao;
     }
 
-    public static boolean movimentar(Personagem personagem, int c, int l) {
-        ArrayList<Posicao> posicoes = personagem.possiveisPosicoes(tabuleiro, 0);
-        if (posicoes.toArray().length == 0) {
-            System.out.println("Voce não pode fazer nada!");
-            return false;
+    private static boolean acaoPorTipo(Personagem personagem, int opcao) {
+        if (opcao == 0) {
+            return movimentar(personagem, opcao);
         } else {
-            System.out.println(tabuleiro.mostraPosicoes(posicoes));
-            int cAlvo, lAlvo;
-            boolean parar = false;
-            do {
-                System.out.print("Coluna (-1 Cancela): ");
-                cAlvo = sc.nextInt();
-                if (cAlvo == -1) {
-                    return false;
-                }
-                System.out.print("Linha (-1 Cancela): ");
-                lAlvo = sc.nextInt();
-                if (lAlvo == -1) {
-                    return false;
-                }
-                if (cAlvo >= 0 && lAlvo >= 0 && cAlvo < 16 && lAlvo < 16) {
-                    if (posicoes.contains(tabuleiro.getTabuleiro()[cAlvo][lAlvo])) {
-                        parar = true;
-                    }
-                } else {
-                    System.out.println("Valores inseridos são inválidos!");
-                }
-            } while (!parar);
-
-            System.out.println(personagem);
-            tabuleiro.getTabuleiro()[cAlvo][lAlvo].setPersonagem(personagem);
-            tabuleiro.getTabuleiro()[c][l].setPersonagem(null);
-
-            return true;
-        }
-    }
-
-    public static boolean verificaAcao(Personagem personagem, Jogador adversario) {
-
-        int acao;
-        ArrayList<Posicao> posicoes;
-
-        do {
-            System.out.print("\n[0] Nada\n" + personagem.mostrarOpcoes() + "\nO que você deseja fazer: ");
-            acao = sc.nextInt();
-
-            posicoes = personagem.possiveisPosicoes(tabuleiro, acao);
-
-            if (acao > 4 || acao < 0) {
-                System.out.println("Valor inválido! Tente Novamente!");
-            } else {
-                if (posicoes.toArray().length == 0) {
-                    System.out.println("Você não pode fazer isso aqui!");
-                } else {
-                    if (!personagem.verificaPC(acao)) {
-                        System.out.println("Você não tem PC o suficiente para isso!");
-                        acao = -1;
-                    }
-                }
-            }
-
-        } while (acao > 4 || acao < 0 || posicoes.toArray().length == 0);
-
-        if (acao == 0) {
-            return false;
-        } else {
-            switch (personagem.tipoDeAcao(acao)) {
-                case 0 -> {
+            switch (personagem.tipoDeAcao(opcao)) {
+                case 0:
                     //o unico motivo pra isso é cura ou descanso do ocultista
-                    personagem.confirmarAcoes(acao, null, 0, null);
+                    personagem.confirmarAcoes(opcao, null, 0, null);
                     System.out.println("Ação realizadada com sucesso!");
                     System.out.println(personagem);
-                }
-                case 1 -> {
-                    System.out.println(tabuleiro.mostraPosicoes(posicoes));
-                    umContraUm(posicoes, adversario, personagem, acao);
-                }
-                case 2 -> {
-                    System.out.println(tabuleiro.mostraPosicoes(posicoes));
-                    buffOuCura(acao, posicoes, personagem);
-                }
-                case 3 -> {
-                    System.out.println(tabuleiro.mostraPosicoes(posicoes));
-                    range(posicoes, acao, personagem);
-                }
+                    break;
+                case 1:
+                    umContraUm(personagem, opcao);
+                    break;
+                case 2:
+                    buffOuCura(opcao, personagem);
+                    break;
+                case 3:
+                    range( opcao, personagem);
+                    break;
+                default:
+                    System.out.println("Opcao Inválida!");
+                    return true;
             }
-            return true;
         }
+        return false;
+    }
+
+    public static boolean movimentar(Personagem personagem, int opcao) {
+        ArrayList<Posicao> posicoesPossiveis = personagem.possiveisPosicoes(tabuleiro, opcao);
+        Posicao posicao;
+        do {
+            System.out.println(tabuleiro.mostraPosicoes(posicoesPossiveis));
+
+            posicao = escolherPosicao();
+            if (posicao == null) {
+                return true;
+            }
+        } while (!posicoesPossiveis.contains(posicao));
+
+        System.out.println(personagem);
+        posicao.setPersonagem(personagem);
+        personagem.getPosicao().setPersonagem(null);
+        personagem.setPosicao(posicao);
+        return false;
     }
 
     public static void range(ArrayList<Posicao> posicoes, int acao, Personagem personagemAgindo) {
@@ -455,7 +416,7 @@ public class Main {
             lAlvo = sc.nextInt();
             if (cAlvo < 0 || cAlvo > 15 || lAlvo < 0 || lAlvo > 15) {
                 System.out.println("valores inseridos são inválidos!");
-            } else if (posicoes.contains(tabuleiro.getTabuleiro()[cAlvo][lAlvo])) {
+            } else if (posicoes.contains(tabuleiro.getPosicoes()[cAlvo][lAlvo])) {
                 parar = true;
             }
         } while (!parar);
@@ -497,18 +458,18 @@ public class Main {
             lAlvo = sc.nextInt();
             if (cAlvo < 0 || cAlvo > 15 || lAlvo < 0 || lAlvo > 15) {
                 System.out.println("valores inseridos são inválidos!");
-            } else if (posicoes.contains(tabuleiro.getTabuleiro()[cAlvo][lAlvo])) {
+            } else if (posicoes.contains(tabuleiro.getPosicoes()[cAlvo][lAlvo])) {
                 parar = true;
             }
         } while (!parar);
 
-        alvos.add(tabuleiro.getTabuleiro()[cAlvo][lAlvo]);
+        alvos.add(tabuleiro.getPosicoes()[cAlvo][lAlvo]);
         personagemAgindo.confirmarAcoes(acao, alvos, 0, null);
 
         switch (acao) {
             case 1 -> {
                 System.out.print("Você o curou com sucesso");
-                System.out.println(tabuleiro.getTabuleiro()[cAlvo][lAlvo].getPersonagem());
+                System.out.println(tabuleiro.getPosicoes()[cAlvo][lAlvo].getPersonagem());
             }
             case 4 -> System.out.print("Você o buffou com sucesso!");
         }
@@ -529,7 +490,7 @@ public class Main {
             lAlvo = sc.nextInt();
             if (cAlvo < 0 || cAlvo > 15 || lAlvo < 0 || lAlvo > 15) {
                 System.out.println("valores inseridos são inválidos!");
-            } else if (posicoes.contains(tabuleiro.getTabuleiro()[cAlvo][lAlvo])) {
+            } else if (posicoes.contains(tabuleiro.getPosicoes()[cAlvo][lAlvo])) {
                 parar = true;
             }
         } while (!parar);
@@ -544,7 +505,7 @@ public class Main {
             }
         } while (defesa > 2 || defesa < 1);
 
-        alvos.add(tabuleiro.getTabuleiro()[cAlvo][lAlvo]);
+        alvos.add(tabuleiro.getPosicoes()[cAlvo][lAlvo]);
 
         if (personagemAgindo.confirmarAcoes(opcao, alvos, defesa, tabuleiro)) {
             System.out.println("Você o acertou com sucesso!");
@@ -552,7 +513,7 @@ public class Main {
             System.out.println("Você errou o ataque!");
         }
 
-        System.out.println(tabuleiro.getTabuleiro()[cAlvo][lAlvo].getPersonagem());
+        System.out.println(tabuleiro.getPosicoes()[cAlvo][lAlvo].getPersonagem());
     }
 
     public static String verificaVencedor() {

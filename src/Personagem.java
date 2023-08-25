@@ -18,6 +18,7 @@ public abstract class Personagem {
     private Jogador dono;
     //simbolo para tostring
     private String simbolo;
+    private Posicao posicao;
 
     public Personagem(int forca, int vigor, int agilidade,
                       int esforco, Jogador dono, String simbolo) {
@@ -44,31 +45,30 @@ public abstract class Personagem {
 
     public abstract String mostrarOpcoes();
 
+    public void setPosicao(Posicao posicao) {
+        this.posicao = posicao;
+    }
+
+    public Posicao getPosicao() {
+        return posicao;
+    }
+
     public ArrayList<Posicao> possiveisPosicoes(Tabuleiro tabuleiro, int opcao) {
         int c = 0, l = 0;
         ArrayList<Posicao> possivelPosicao = new ArrayList<>();
 
-        //Pega o indice do personagem que esta fazendo a ação
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                if (tabuleiro.getTabuleiro()[i][j].getPersonagem() != null &&
-                        tabuleiro.getTabuleiro()[i][j].getPersonagem() == this) {
-                    c = i;
-                    l = j;
-                }
-            }
-        }
-
-        percorrendoOTabuleiro(possivelPosicao, tabuleiro, c, l, 1, opcao);
-        percorrendoOTabuleiro(possivelPosicao, tabuleiro, l, c, 2, opcao);
-
+        percorrendoOTabuleiro(possivelPosicao, tabuleiro, 1, opcao);
+        percorrendoOTabuleiro(possivelPosicao, tabuleiro, 2, opcao);
         percorrendoDiagonal(possivelPosicao, tabuleiro, c, l, opcao);
 
         return possivelPosicao;
     }
 
-    private void percorrendoOTabuleiro(ArrayList<Posicao> possibilidades, Tabuleiro tabuleiro,
-                                       int i, int j, int direcaoAtaque, int opcao) {
+    private void percorrendoOTabuleiro(ArrayList<Posicao> possibilidades, Tabuleiro tabuleiro, int direcaoAtaque, int opcao) {
+
+        int[] indices = tabuleiro.getIndices(this.posicao);
+        int i = indices[0];
+        int j = indices[1];
 
         //distancia de acordo com a acao
         int distancia = switch (tipoDeAcao(opcao)) {
@@ -87,8 +87,8 @@ public abstract class Personagem {
 
                 //1 = direita esquerda / 2 = cima baixo
                 Posicao posicaoNoTabuleiro = direcaoAtaque == 1 ?
-                        tabuleiro.getTabuleiro()[k][j] :
-                        tabuleiro.getTabuleiro()[j][k];
+                        tabuleiro.getPosicoes()[k][j] :
+                        tabuleiro.getPosicoes()[j][k];
 
                 if (diferenciandoTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)) {
                     break;
@@ -164,7 +164,7 @@ public abstract class Personagem {
                     int c = i + (modificadorI * k);
                     int l = j + (modificadorJ * k);
                     if (c >= 0 && l >= 0 && c < 16 && l < 16) {
-                        Posicao posicaoNoTabuleiro = tabuleiro.getTabuleiro()[c][l];
+                        Posicao posicaoNoTabuleiro = tabuleiro.getPosicoes()[c][l];
 
                         if (diferenciandoTiposDeAcoes(posicaoNoTabuleiro, opcao, possibilidades)) {
                             break;

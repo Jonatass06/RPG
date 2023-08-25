@@ -20,4 +20,8 @@ public abstract class ModoDeJogo {
     public int getQtdeSuporte() {
         return qtdeSuporte;
     }
+
+    public int getQtdePersonagens(){
+        return qtdeSuporte + qtdeOcultista + qtdeCombatente;
+    }
 }

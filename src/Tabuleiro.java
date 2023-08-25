@@ -42,7 +42,26 @@ public class Tabuleiro {
         }
     }
 
-    public Posicao[][] getTabuleiro() {
+    public Posicao getPosicao(int c, int l){
+        if(c >= 0 && c <= 15 && l >= 0 && l <= 15){
+            return tabuleiro[c][l];
+        }
+        return null;
+    }
+    public int[] getIndices(Posicao posicao){
+        int[] retorno = new int[2];
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 16; j++) {
+                if (tabuleiro[i][j].equals(posicao)) {
+                    retorno[0] = i;
+                    retorno[1] = j;
+                }
+            }
+        }
+        return retorno;
+    }
+
+    public Posicao[][] getPosicoes() {
         return tabuleiro;
     }
 

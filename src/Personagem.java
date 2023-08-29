@@ -245,6 +245,7 @@ public abstract class Personagem {
     protected void receberDano(int dano, Tabuleiro tabuleiro) {
         if (this.vida - dano <= 0) {
             tabuleiro.removerPersonagem(this);
+            dono.removerPersonagem(this);
         } else {
             this.vida -= dano;
         }

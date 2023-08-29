@@ -32,6 +32,10 @@ public class Jogador {
         this.personagens.add(personagem);
     }
 
+    public void removerPersonagem(Personagem personagem){
+        personagens.remove(personagem);
+    }
+
     public String getNome() {
         return nome;
     }

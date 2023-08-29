@@ -16,11 +16,7 @@ public class Ocultista extends Personagem {
         // 2- Bater
         // 4- Enfeiticar
         switch (acao) {
-            case 1 -> this.mudaPontosCombate(2);
-            case 3 -> {
-                this.mudaPontosCombate(-2);
-                this.seCurar();
-            }
+
             case 2 -> {
                 return this.bater(posicoes.get(0), defesa, 6, tabuleiro);
             }
@@ -34,12 +30,20 @@ public class Ocultista extends Personagem {
 
     @Override
     public int tipoDeAcao(int opcao) {
+
         //0 == nao atacando; 1 = personagem oponente; 2 == personagem aliado; 3 range
-        return switch (opcao) {
-            case 2 -> 1;
-            case 4 -> 3;
-            default -> 0;
-        };
+        switch (opcao) {
+            case 2 : return 1;
+            case 4 : return 3;
+            case 1 :
+                this.mudaPontosCombate(2);
+                break;
+            case 3 :
+                this.mudaPontosCombate(-2);
+                this.seCurar();
+                break;
+            }
+        return 0;
     }
 
     @Override

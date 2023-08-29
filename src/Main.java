@@ -212,29 +212,6 @@ public class Main {
         Personagem personagem = escolherPersonagem();
         escolheAcao(personagem);
 
-    }
-
-    boolean parar = false;
-    boolean posicoesDefinidas = false;
-
-
-    //caso o jogador desista de agir com o personagem
-        if(!
-
-    escolhePersonagem(jogador, adversario))
-
-    {
-        i--;
-        //caso acabe o jogo!
-    } else if(
-            !tabuleiro.procuraPersonagem(usuarioAdversario)||
-            !tabuleiro.procuraPersonagem(usuarioLogado))
-
-    {
-        parar = true;
-        System.out.println(verificaVencedor());
-    }
-
 
 }
 
@@ -338,7 +315,6 @@ public class Main {
     public static int escolheAcao(Personagem personagem) {
         int opcao;
         boolean repetir;
-        ArrayList<Posicao> posicoes;
         do {
             System.out.println("""
                     Você deseja:
@@ -365,18 +341,17 @@ public class Main {
             switch (personagem.tipoDeAcao(opcao)) {
                 case 0:
                     //o unico motivo pra isso é cura ou descanso do ocultista
-                    personagem.confirmarAcoes(opcao, null, 0, null);
                     System.out.println("Ação realizadada com sucesso!");
                     System.out.println(personagem);
                     break;
                 case 1:
-                    umContraUm(personagem, opcao);
+                    umContraUm(opcao,personagem);
                     break;
                 case 2:
                     buffOuCura(opcao, personagem);
                     break;
                 case 3:
-                    range( opcao, personagem);
+                    range(opcao, personagem);
                     break;
                 default:
                     System.out.println("Opcao Inválida!");
@@ -405,9 +380,26 @@ public class Main {
         return false;
     }
 
-    public static void range(ArrayList<Posicao> posicoes, int acao, Personagem personagemAgindo) {
-        int cAlvo, lAlvo;
+    public static void range(int acao, Personagem personagemAgindo) {
+        ArrayList<Posicao> posicoes = personagemAgindo.possiveisPosicoes(tabuleiro, acao);
         ArrayList<Posicao> alvos;
+
+        alvos = definirRange(posicoes);
+
+        boolean sucesso = personagemAgindo.confirmarAcoes(acao, alvos, 1, tabuleiro);
+        switch (acao) {
+            case 2 -> System.out.println("Você os curou com sucesso");
+            case 4 -> {
+                if (sucesso) {
+                    System.out.println("Você acertou pelo menos 1 personagem com esse ataque!");
+                }
+            }
+        }
+        mostrarMultiplasVidas(alvos);
+    }
+
+    public static ArrayList<Posicao> definirRange(ArrayList<Posicao> posicoes){
+        int cAlvo, lAlvo;
         boolean parar = false;
         do {
             System.out.print("Onde você deseja fazer isso: \nColuna: ");
@@ -420,20 +412,62 @@ public class Main {
                 parar = true;
             }
         } while (!parar);
+        return tabuleiro.definirRange(cAlvo, lAlvo);
+    }
 
-        alvos = tabuleiro.definirRange(cAlvo, lAlvo);
+    public static void buffOuCura(int acao, Personagem personagemAgindo) {
+        ArrayList<Posicao> posicoes = personagemAgindo.possiveisPosicoes(tabuleiro, acao);
+        ArrayList<Posicao> alvos = new ArrayList<>();
 
         switch (acao) {
-            case 2 -> {
-                personagemAgindo.confirmarAcoes(acao, alvos, 0, null);
-                System.out.println("Você os curou com sucesso");
-            }
-            case 4 -> {
-                if (personagemAgindo.confirmarAcoes(acao, alvos, 1, tabuleiro)) {
-                    System.out.println("Você acertou pelo menos 1 personagem com esse ataque!");
-                }
-            }
+            case 1 -> System.out.print("Qual personagem você deseja curar: \nColuna: ");
+            case 4 -> System.out.print("Qual personagem você deseja buffar: \nColuna: ");
         }
+        Personagem personagemAlvo = escolherPersonagemAlvo(posicoes, partida.jogadorNaVez());
+
+        alvos.add(personagemAlvo.getPosicao());
+        personagemAgindo.confirmarAcoes(acao,  new ArrayList<>(), 0, null);
+
+        switch (acao) {
+            case 1 -> {
+                System.out.print("Você o curou com sucesso");
+                System.out.println(personagemAlvo);
+            }
+            case 4 -> System.out.print("Você o buffou com sucesso!");
+        }
+    }
+
+    public static void umContraUm(int acao,Personagem personagemAgindo) {
+        Jogador adversario = partida.jogadorAdversario();
+        ArrayList<Posicao> posicoes = personagemAgindo.possiveisPosicoes(tabuleiro, acao);
+        ArrayList<Posicao> alvos = new ArrayList<>();
+
+        System.out.print("Qual personagem você deseja atacar:");
+        Personagem personagemAlvo = escolherPersonagemAlvo(posicoes, adversario);
+
+        int defesa = escolherDefesa();
+        alvos.add(personagemAlvo.getPosicao());
+
+        if (personagemAgindo.confirmarAcoes(acao, alvos, defesa, tabuleiro)) {
+            System.out.println("Você o acertou com sucesso!");
+        } else {
+            System.out.println("Você errou o ataque!");
+        }
+        System.out.println(personagemAlvo);
+    }
+
+    public static Personagem escolherPersonagemAlvo(ArrayList<Posicao> posicoes, Jogador jogador){
+        Personagem personagem;
+        do {
+            personagem = escolherPersonagem(jogador);
+            if (!posicoes.contains(personagem.getPosicao())) {
+                System.out.println("Esse personagem não está entre os personagens que podem sofrer essa ação!");
+            }
+        } while (posicoes.contains(personagem.getPosicao()));
+        return personagem;
+    }
+
+    public static void mostrarMultiplasVidas(ArrayList<Posicao> alvos){
         for (Posicao alvo : alvos) {
             if (alvo.getPersonagem() != null) {
                 System.out.println(alvo.getPersonagem());
@@ -443,60 +477,10 @@ public class Main {
         }
     }
 
-    public static void buffOuCura(int acao, ArrayList<Posicao> posicoes, Personagem personagemAgindo) {
-        ArrayList<Posicao> alvos = new ArrayList<>();
-        int cAlvo, lAlvo;
-        boolean parar = false;
-
+    public static int escolherDefesa(){
+        int defesa;
         do {
-            switch (acao) {
-                case 1 -> System.out.print("Qual personagem você deseja curar: \nColuna: ");
-                case 4 -> System.out.print("Qual personagem você deseja buffar: \nColuna: ");
-            }
-            cAlvo = sc.nextInt();
-            System.out.print("Linha: ");
-            lAlvo = sc.nextInt();
-            if (cAlvo < 0 || cAlvo > 15 || lAlvo < 0 || lAlvo > 15) {
-                System.out.println("valores inseridos são inválidos!");
-            } else if (posicoes.contains(tabuleiro.getPosicoes()[cAlvo][lAlvo])) {
-                parar = true;
-            }
-        } while (!parar);
-
-        alvos.add(tabuleiro.getPosicoes()[cAlvo][lAlvo]);
-        personagemAgindo.confirmarAcoes(acao, alvos, 0, null);
-
-        switch (acao) {
-            case 1 -> {
-                System.out.print("Você o curou com sucesso");
-                System.out.println(tabuleiro.getPosicoes()[cAlvo][lAlvo].getPersonagem());
-            }
-            case 4 -> System.out.print("Você o buffou com sucesso!");
-        }
-
-        System.out.println(alvos.get(0).getPersonagem());
-    }
-
-    public static void umContraUm(ArrayList<Posicao> posicoes, Jogador adversario,
-                                  Personagem personagemAgindo, int opcao) {
-        int defesa, cAlvo, lAlvo;
-        ArrayList<Posicao> alvos = new ArrayList<>();
-        boolean parar = false;
-
-        do {
-            System.out.print("Qual personagem você deseja atacar: \nColuna: ");
-            cAlvo = sc.nextInt();
-            System.out.print("Linha: ");
-            lAlvo = sc.nextInt();
-            if (cAlvo < 0 || cAlvo > 15 || lAlvo < 0 || lAlvo > 15) {
-                System.out.println("valores inseridos são inválidos!");
-            } else if (posicoes.contains(tabuleiro.getPosicoes()[cAlvo][lAlvo])) {
-                parar = true;
-            }
-        } while (!parar);
-
-        do {
-            System.out.println(adversario.getNome() + ", como você deseja defender?\n" +
+            System.out.println(partida.jogadorAdversario().getNome() + ", como você deseja defender?\n" +
                     "[1] Esquivar\n" +
                     "[2] Bloquear");
             defesa = sc.nextInt();
@@ -504,25 +488,23 @@ public class Main {
                 System.out.println("Valor inserido inválido!!");
             }
         } while (defesa > 2 || defesa < 1);
-
-        alvos.add(tabuleiro.getPosicoes()[cAlvo][lAlvo]);
-
-        if (personagemAgindo.confirmarAcoes(opcao, alvos, defesa, tabuleiro)) {
-            System.out.println("Você o acertou com sucesso!");
-        } else {
-            System.out.println("Você errou o ataque!");
-        }
-
-        System.out.println(tabuleiro.getPosicoes()[cAlvo][lAlvo].getPersonagem());
+        return defesa;
     }
 
-    public static String verificaVencedor() {
-        if (tabuleiro.procuraPersonagem(usuarioLogado)) {
-            return usuarioLogado.getNome() + ", parabéns! Você venceu o jogo!";
-        } else if (tabuleiro.procuraPersonagem(usuarioAdversario)) {
-            return usuarioAdversario.getNome() + ", parabéns! Você venceu o jogo!";
+    public static boolean verificaVencedor() {
+       Jogador jogador;
+        if (partida.jogadorNaVez().getPersonagens().size() == 0 &&
+                partida.jogadorAdversario().getPersonagens().size() == 0) {
+            System.out.println("Infelizmente o jogo terminou em empate! Os dois foram ótimos");
+            return true;
+        } else if (partida.jogadorAdversario().getPersonagens().size() == 0) {
+            jogador = partida.jogadorNaVez();
+        } else if (partida.jogadorNaVez().getPersonagens().size() == 0) {
+            jogador = partida.jogadorAdversario();
         } else {
-            return "Infelizmente o jogo terminou em empate! Os dois foram ótimos";
+            return false;
         }
+        System.out.println(jogador.getNome() + ", parabéns! Você venceu o jogo!");
+        return true;
     }
 }
